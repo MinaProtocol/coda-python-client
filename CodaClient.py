@@ -227,7 +227,7 @@ class Client():
     return res["data"]
 
   def send_payment(self, to_pk: str, from_pk: str, amount: str, fee: str, memo: str) -> dict:
-    """Send a payment from the specified wallet to the specified tatget wallet. 
+    """Send a payment from the specified wallet to the specified target wallet. 
     
     Arguments:
         to_pk {str} -- The target wallet where funds should be sent

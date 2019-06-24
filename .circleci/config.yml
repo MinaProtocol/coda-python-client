@@ -24,7 +24,7 @@ jobs:
             - v1-dependencies-
 
       - run:
-          name: install dependencies
+          name: Install Dependencies
           command: |
             python3 -m venv venv
             . venv/bin/activate
@@ -41,7 +41,7 @@ jobs:
 
       - run: 
           name: Install JFrog CLI
-          command: ./scripts/skip_if_only_frontend.sh bash -c 'curl -fL https://getcli.jfrog.io | sh'
+          command: bash -c 'curl -fL https://getcli.jfrog.io | sh'
 
       - run: 
           name: Configure JFrog CLI

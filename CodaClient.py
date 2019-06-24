@@ -57,6 +57,8 @@ class Client():
     Returns:
         dict -- Returns the JSON Response as a Dict.
     """
+    # Strip all the whitespace and replace with spaces
+    query = " ".join(query.split())
     payload = {'query': query}
     if variables:
       payload = { **payload, 'variables': variables }
@@ -120,6 +122,11 @@ class Client():
     return res["data"]
 
   def get_wallets(self) -> dict:
+    """Gets the wallets that are currently installed in the Coda Daemon.
+    
+    Returns:
+        dict -- Returns the "data" field of the JSON Response as a Dict.
+    """
     query = '''
     {
       ownedWallets {

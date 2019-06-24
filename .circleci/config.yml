@@ -37,10 +37,19 @@ jobs:
           paths:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
-          
+
       - run: 
           name: Package Library
           command: python3 setup.py sdist bdist_wheel
+
       - run: 
-          name: Upload Package
-          command: twine upload --repository-url $ARTIFACTORY_URL/pypi-local/ --username $ARTIFACTORY_USER --password $ARTIFACTORY_API_KEY dist/* 
+          name: Install JFrog CLI
+          command: ./scripts/skip_if_only_frontend.sh bash -c 'curl -fL https://getcli.jfrog.io | sh'
+
+      - run: 
+          name: Configure JFrog CLI
+          command: ./jfrog rt config --url $ARTIFACTORY_URL --user $ARTIFACTORY_USER --apikey $ARTIFACTORY_API_KEY --interactive=false
+      
+      - run: 
+          name: Release Build to Artifactory
+          command: ./jfrog rt u "dist/(CodaClient*)" /pypi-local/codaclient/{1} --recursive=false 

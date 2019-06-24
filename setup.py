@@ -15,7 +15,7 @@ setup(
     license='Apache License 2.0',
     py_modules=['CodaClient'],
     install_requires=[
-        'requests==2.22.0',
+        'requests',
     ],
     long_description=open('README.md').read(),
 )

@@ -206,7 +206,7 @@ class Client():
     res = self._send_query(query)
     return res["data"]
 
-  def create_wallet(self, pk: str, sk: str) -> dict:
+  def create_wallet(self, pk: str="", sk: str="") -> dict:
     """Creates a new wallet with the specified Public and Secret Keys.
     
     Arguments:

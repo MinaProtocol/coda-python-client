@@ -5,6 +5,8 @@ try:
 except ImportError:
     from distutils.core import setup
 
+tests_require = ['six', 'pytest', 'pytest-cov', 'python-coveralls', 'mock', 'pysnap']
+
 setup(
     name='CodaClient',
     version='0.0.1',
@@ -17,5 +19,12 @@ setup(
     install_requires=[
         'requests',
     ],
+    extras_require={
+        'test': tests_require,
+        'pytest': [
+            'pytest',
+        ]
+    },
+    tests_require=tests_require,
     long_description=open('README.md').read(),
 )

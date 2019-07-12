@@ -1,6 +1,10 @@
 #!/usr/bin/python3
 
 import requests
+import time
+import json
+import asyncio
+import websockets
 
 class Client():
   # Implements a GraphQL Client for the Coda Daemon
@@ -8,11 +12,13 @@ class Client():
   def __init__(
       self,
       graphql_protocol: str = "http",
+      websocket_protocol: str = "ws",
       graphql_host: str = "localhost",
       graphql_path: str = "/graphql",
       graphql_port: int = 8080,
   ):
     self.endpoint = f"{graphql_protocol}://{graphql_host}:{graphql_port}{graphql_path}"
+    self.websocket_endpoint = f"{websocket_protocol}://{graphql_host}:{graphql_port}{graphql_path}"
 
   def _send_query(self, query: str, variables: dict = {}) -> dict:
     """Sends a query to the Coda Daemon's GraphQL Endpoint
@@ -69,6 +75,33 @@ class Client():
       raise Exception(
           f"Query failed -- returned code {request.status_code}. {query}")
   
+  async def _graphql_subscription(self, query: str, variables: dict = {}): 
+    hello_message = {"type": "connection_init", "payload": {}}
+
+    # Strip all the whitespace and replace with spaces
+    query = " ".join(query.split())
+    payload = {'query': query}
+    if variables:
+      payload = { **payload, 'variables': variables }
+    
+    query_message = {"id": "1", "type": "start", "payload": payload}
+    print("Listening to GraphQL Subscription, press control+c to exit.")
+    print(json.dumps(payload))
+    
+    uri = self.websocket_endpoint
+    async with websockets.connect(uri) as websocket:
+      print("Sending: ", hello_message)
+      await websocket.send(json.dumps(hello_message))
+      print(await websocket.recv())
+      print("Sending: ", query_message)
+      await websocket.send(json.dumps(query_message))
+      try:
+        while True:
+          time.sleep(10)
+          print(await websocket.recv())
+      except KeyboardInterrupt: 
+        return True
+
   def get_daemon_status(self) -> dict:
     """Gets the status of the currently configured Coda Daemon.
     
@@ -308,6 +341,12 @@ class Client():
     return res["data"]
 
   def listen_new_blocks(self, key: str):
+    """Creates a subscription for new blocks created by a proposer using a particular private key.
+    Blocks until ctl+c
+    
+    Arguments:
+        key {str} -- The key to use to filter blocks
+    """
     query = '''
       subscription($key:String){
         newBlock(key:$key){
@@ -344,9 +383,12 @@ class Client():
     variables = {
       "key": key
     }
-    pass
+    asyncio.run(self._graphql_subscription(query, variables))
 
   def listen_block_confirmations(self):
+    """Creates a subscription for Block Confirmations
+    Blocks until ctl+c
+    """
     query = '''
     subscription{
       blockConfirmation {
@@ -355,16 +397,16 @@ class Client():
       }
     }
     '''
-    pass
+    asyncio.run(self._graphql_subscription(query))
 
   def listen_sync_update(self):
+    """Creates a subscription for Network Sync Updates
+    Blocks until ctl+c
+    """
     query = '''
     subscription{
       newSyncUpdate 
     }
     '''
-    pass
-
-if __name__ == "__main__":
-  client = Client()
-  print(client.get_pooled_payments("foo"))
+    asyncio.get_event_loop().run_until_complete(self._graphql_subscription(query))
+    asyncio.get_event_loop().run_forever()

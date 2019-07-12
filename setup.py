@@ -5,11 +5,15 @@ try:
 except ImportError:
     from distutils.core import setup
 
-tests_require = ['six', 'pytest', 'pytest-cov', 'python-coveralls', 'mock', 'pysnap']
+with open('README.md') as f:
+    readme = f.read()
+
+tests_require = ['six', 'pytest', 'pytest-cov', 'python-coveralls', 'mock', 'pysnap', 'websockets', 'asyncio']
 
 setup(
     name='CodaClient',
-    version='0.0.1',
+    version='0.0.2',
+    python_requires='>=3.4',
     description='A Python wrapper around the Coda Daemon GraphQL API.',
     github='http://github.com/CodaProtocol/coda-python',
     author='Conner Swann',
@@ -27,4 +31,16 @@ setup(
     },
     tests_require=tests_require,
     long_description=open('README.md').read(),
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Developers',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Topic :: Software Development :: Libraries',
+        'License :: OSI Approved :: Apache Software License'
+    ],
 )

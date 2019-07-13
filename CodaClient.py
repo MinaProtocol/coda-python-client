@@ -17,8 +17,8 @@ class Client():
       graphql_path: str = "/graphql",
       graphql_port: int = 8080,
   ):
-    self.endpoint = f"{graphql_protocol}://{graphql_host}:{graphql_port}{graphql_path}"
-    self.websocket_endpoint = f"{websocket_protocol}://{graphql_host}:{graphql_port}{graphql_path}"
+    self.endpoint = "{}://{}:{}{}".format(graphql_protocol, graphql_host, graphql_port, graphql_path)
+    self.websocket_endpoint = "{}://{}:{}{}".format(websocket_protocol, graphql_host, graphql_port, graphql_path)
 
   def _send_query(self, query: str, variables: dict = {}) -> dict:
     """Sends a query to the Coda Daemon's GraphQL Endpoint
@@ -73,7 +73,7 @@ class Client():
       return request.json()
     else:
       raise Exception(
-          f"Query failed -- returned code {request.status_code}. {query}")
+          "Query failed -- returned code {}. {}".format(request.status_code, query))
   
   async def _graphql_subscription(self, query: str, variables: dict = {}): 
     hello_message = {"type": "connection_init", "payload": {}}

@@ -8,7 +8,7 @@ except ImportError:
 with open('README.md') as f:
     readme = f.read()
 
-tests_require = ['six', 'pytest', 'pytest-cov', 'python-coveralls', 'mock', 'pysnap', 'websockets', 'asyncio']
+tests_require = ['six', 'pytest', 'pytest-cov', 'python-coveralls', 'mock', 'pysnap']
 
 setup(
     name='CodaClient',
@@ -22,6 +22,8 @@ setup(
     py_modules=['CodaClient'],
     install_requires=[
         'requests',
+        'websockets',
+        'asyncio'
     ],
     extras_require={
         'test': tests_require,

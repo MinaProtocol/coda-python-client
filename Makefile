@@ -6,3 +6,6 @@ dist:
 
 dist-upload:
 	twine upload --username $PYPI_USER --password $PYPI_PASSWORD dist/*
+
+test: 
+	py.test

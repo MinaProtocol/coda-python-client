@@ -124,7 +124,7 @@ workflows:
       - test-3.7
       - test-3.6
       - test-3.5
-      - deploy:
+      - release:
           requires:
             - test-3.7
             - test-3.6

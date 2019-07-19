@@ -68,12 +68,13 @@ class Client():
     payload = {'query': query}
     if variables:
       payload = { **payload, 'variables': variables }
-    request = requests.post(self.endpoint, json=payload)
-    if request.status_code == 200:
-      return request.json()
+    response = requests.post(self.endpoint, json=payload)
+    if response.status_code == 200:
+      return response.json()
     else:
+      print(response)
       raise Exception(
-          "Query failed -- returned code {}. {}".format(request.status_code, query))
+          "Query failed -- returned code {}. {}".format(response.status_code, query))
   
   async def _graphql_subscription(self, query: str, variables: dict = {}): 
     hello_message = {"type": "connection_init", "payload": {}}

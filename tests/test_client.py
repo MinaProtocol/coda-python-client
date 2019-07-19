@@ -52,11 +52,11 @@ class TestCodaClient():
         client.get_wallets()
         snapshot.assert_match(mock_post.call_args_list)
 
-    def test_get_balance(self, mock_post, snapshot):
+    def test_get_wallet(self, mock_post, snapshot):
         mock_post.return_value = self._mock_response(json_data={"data": "foo"})
 
         client = Client()
-        client.get_balance("pk")
+        client.get_wallet("pk")
         snapshot.assert_match(mock_post.call_args_list)
 
     def test_get_current_snark_worker(self, mock_post, snapshot):

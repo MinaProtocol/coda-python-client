@@ -10,11 +10,11 @@ snapshots = Snapshot()
 snapshots['TestCodaClient.test_get_daemon_status 1'] = [
     (
         (
-            'http://localhost:8080/graphql'
+            'http://localhost:8304/graphql'
         ,),
         {
             'json': {
-                'query': 'query { daemonStatus { numAccounts blockCount uptimeSecs ledgerMerkleRoot stagedLedgerHash stateHash peers userCommandsSent runSnarkWorker proposePubkeys consensusTimeNow consensusTimeBestTip consensusMechanism consensusConfiguration { delta k c cTimesK slotsPerEpoch slotDuration epochDuration acceptableNetworkDelay } } }'
+                'query': 'query { daemonStatus { numAccounts blockchainLength uptimeSecs ledgerMerkleRoot stagedLedgerHash stateHash peers userCommandsSent runSnarkWorker proposePubkeys consensusTimeNow consensusTimeBestTip consensusMechanism consensusConfiguration { delta k c cTimesK slotsPerEpoch slotDuration epochDuration acceptableNetworkDelay } } }'
             }
         }
     ,)
@@ -23,7 +23,7 @@ snapshots['TestCodaClient.test_get_daemon_status 1'] = [
 snapshots['TestCodaClient.test_get_daemon_version 1'] = [
     (
         (
-            'http://localhost:8080/graphql'
+            'http://localhost:8304/graphql'
         ,),
         {
             'json': {
@@ -36,7 +36,7 @@ snapshots['TestCodaClient.test_get_daemon_version 1'] = [
 snapshots['TestCodaClient.test_get_wallets 1'] = [
     (
         (
-            'http://localhost:8080/graphql'
+            'http://localhost:8304/graphql'
         ,),
         {
             'json': {
@@ -46,26 +46,10 @@ snapshots['TestCodaClient.test_get_wallets 1'] = [
     ,)
 ]
 
-snapshots['TestCodaClient.test_get_balance 1'] = [
-    (
-        (
-            'http://localhost:8080/graphql'
-        ,),
-        {
-            'json': {
-                'query': 'query($publicKey:String!){ balance(publicKey:$publicKey) }',
-                'variables': {
-                    'publicKey': 'pk'
-                }
-            }
-        }
-    ,)
-]
-
 snapshots['TestCodaClient.test_get_current_snark_worker 1'] = [
     (
         (
-            'http://localhost:8080/graphql'
+            'http://localhost:8304/graphql'
         ,),
         {
             'json': {
@@ -78,7 +62,7 @@ snapshots['TestCodaClient.test_get_current_snark_worker 1'] = [
 snapshots['TestCodaClient.test_get_sync_status 1'] = [
     (
         (
-            'http://localhost:8080/graphql'
+            'http://localhost:8304/graphql'
         ,),
         {
             'json': {
@@ -91,7 +75,7 @@ snapshots['TestCodaClient.test_get_sync_status 1'] = [
 snapshots['TestCodaClient.test_set_current_snark_worker 1'] = [
     (
         (
-            'http://localhost:8080/graphql'
+            'http://localhost:8304/graphql'
         ,),
         {
             'json': {
@@ -104,7 +88,7 @@ snapshots['TestCodaClient.test_set_current_snark_worker 1'] = [
 snapshots['TestCodaClient.test_create_wallet_with_args 1'] = [
     (
         (
-            'http://localhost:8080/graphql'
+            'http://localhost:8304/graphql'
         ,),
         {
             'json': {
@@ -121,7 +105,7 @@ snapshots['TestCodaClient.test_create_wallet_with_args 1'] = [
 snapshots['TestCodaClient.test_create_wallet_no_args 1'] = [
     (
         (
-            'http://localhost:8080/graphql'
+            'http://localhost:8304/graphql'
         ,),
         {
             'json': {
@@ -138,7 +122,7 @@ snapshots['TestCodaClient.test_create_wallet_no_args 1'] = [
 snapshots['TestCodaClient.test_send_payment 1'] = [
     (
         (
-            'http://localhost:8080/graphql'
+            'http://localhost:8304/graphql'
         ,),
         {
             'json': {
@@ -149,6 +133,22 @@ snapshots['TestCodaClient.test_send_payment 1'] = [
                     'from': 'from_pk',
                     'memo': 'memo',
                     'to': 'to_pk'
+                }
+            }
+        }
+    ,)
+]
+
+snapshots['TestCodaClient.test_get_wallet 1'] = [
+    (
+        (
+            'http://localhost:8304/graphql'
+        ,),
+        {
+            'json': {
+                'query': 'query($publicKey:PublicKey!){ wallet(publicKey:$publicKey) { publicKey balance { total unknown } nonce receiptChainHash delegate votingFor stakingActive privateKeyPath } }',
+                'variables': {
+                    'publicKey': 'pk'
                 }
             }
         }

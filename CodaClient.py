@@ -15,7 +15,7 @@ class Client():
       websocket_protocol: str = "ws",
       graphql_host: str = "localhost",
       graphql_path: str = "/graphql",
-      graphql_port: int = 8080,
+      graphql_port: int = 8304,
   ):
     self.endpoint = "{}://{}:{}{}".format(graphql_protocol, graphql_host, graphql_port, graphql_path)
     self.websocket_endpoint = "{}://{}:{}{}".format(websocket_protocol, graphql_host, graphql_port, graphql_path)
@@ -112,7 +112,7 @@ class Client():
     query {
       daemonStatus {
         numAccounts
-        blockCount
+        blockchainLength
         uptimeSecs
         ledgerMerkleRoot
         stagedLedgerHash
@@ -170,8 +170,8 @@ class Client():
     res = self._send_query(query)
     return res["data"]
 
-  def get_balance(self, pk: str) -> dict:
-    """Gets the balance for the specified Public Key.
+  def get_wallet(self, pk: str) -> dict:
+    """Gets the wallet for the specified Public Key.
     
     Arguments:
         pk {str} -- A Public Key corresponding to a currently installed wallet.
@@ -180,8 +180,20 @@ class Client():
         dict -- Returns the "data" field of the JSON Response as a Dict.
     """
     query = '''
-    query($publicKey:String!){
-      balance(publicKey:$publicKey)
+    query($publicKey:PublicKey!){
+      wallet(publicKey:$publicKey) {
+        publicKey
+    		balance {
+    		  total
+    		  unknown
+    		}
+        nonce
+        receiptChainHash
+        delegate
+        votingFor
+        stakingActive
+        privateKeyPath
+      }
     }
     '''
     variables = {

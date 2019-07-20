@@ -79,13 +79,6 @@ class TestCodaClient():
         client = Client()
         client.set_current_snark_worker("pk", "fee")
         snapshot.assert_match(mock_post.call_args_list)
-
-    def test_create_wallet_with_args(self, mock_post, snapshot):
-        mock_post.return_value = self._mock_response(json_data={"data": "foo"})
-
-        client = Client()
-        client.create_wallet("pk", "sk")
-        snapshot.assert_match(mock_post.call_args_list)
     
     def test_create_wallet_no_args(self, mock_post, snapshot):
         mock_post.return_value = self._mock_response(json_data={"data": "foo"})

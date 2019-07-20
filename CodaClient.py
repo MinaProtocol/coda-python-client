@@ -34,7 +34,7 @@ class Client():
     """
     return self._graphql_request(query, variables)
 
-  def _send_mutation(self, query: str, variables: dict) -> dict:
+  def _send_mutation(self, query: str, variables: dict = {}) -> dict:
     """Sends a mutation to the Coda Daemon's GraphQL Endpoint.
     
     Arguments:
@@ -68,7 +68,11 @@ class Client():
     payload = {'query': query}
     if variables:
       payload = { **payload, 'variables': variables }
-    response = requests.post(self.endpoint, json=payload)
+
+    headers = {
+      "Accept": "application/json"
+    }
+    response = requests.post(self.endpoint, json=payload, headers=headers)
     if response.status_code == 200:
       return response.json()
     else:
@@ -116,7 +120,6 @@ class Client():
         blockchainLength
         uptimeSecs
         ledgerMerkleRoot
-        stagedLedgerHash
         stateHash
         peers
         userCommandsSent
@@ -125,6 +128,8 @@ class Client():
         consensusTimeNow
         consensusTimeBestTip
         consensusMechanism
+        confDir
+        commitId
         consensusConfiguration {
           delta
           k
@@ -148,10 +153,10 @@ class Client():
         dict -- Returns the "data" field of the JSON Response as a Dict.
     """
     query = '''
-        {
-            version
-        }
-        '''
+    {
+        version
+    }
+    '''
     res = self._send_query(query)
     return res["data"]
 
@@ -252,48 +257,40 @@ class Client():
     res = self._send_query(query)
     return res["data"]
 
-  def create_wallet(self, pk: str="", sk: str="") -> dict:
-    """Creates a new wallet with the specified Public and Secret Keys.
+  def create_wallet(self) -> dict:
+    """Creates a new wallet and returns the public key.
     
     Arguments:
-        pk {str} -- The private key for the new wallet
-        sk {str} -- The secret key for the new wallet
+      N/A
     
     Returns:
         dict -- Returns the "data" field of the JSON Response as a Dict
     """
     query = '''
-    mutation($publicKey:String, $privateKey:String){
-      addWallet(input: {
-        publicKey:$publicKey,
-        privateKey:$privateKey
-      }) {
+    mutation{
+      addWallet {
         publicKey
       }
     }
     '''
-    variables = {
-      "publicKey": pk,
-      "privateKey": sk
-    }
-    res = self._send_mutation(query, variables)
+    res = self._send_mutation(query)
     return res["data"]
 
-  def send_payment(self, to_pk: str, from_pk: str, amount: str, fee: str, memo: str) -> dict:
+  def send_payment(self, to_pk: str, from_pk: str, amount: int, fee: int, memo: str) -> dict:
     """Send a payment from the specified wallet to the specified target wallet. 
     
     Arguments:
-        to_pk {str} -- The target wallet where funds should be sent
-        from_pk {str} -- The installed wallet which will finance the payment
-        amount {str} -- Tha amount of Coda to send
-        fee {str} -- The transaction fee that will be attached to the payment
+        to_pk {PublicKey} -- The target wallet where funds should be sent
+        from_pk {PublicKey} -- The installed wallet which will finance the payment
+        amount {UInt64} -- Tha amount of Coda to send
+        fee {UInt64} -- The transaction fee that will be attached to the payment
         memo {str} -- A memo to attach to the payment
     
     Returns:
         dict -- Returns the "data" field of the JSON Response as a Dict
     """
     query = '''
-    mutation($from:String!, $to:String!, $amount:String!, $fee:String!, $memo:String){
+    mutation($from:PublicKey!, $to:PublicKey!, $amount:UInt64!, $fee:UInt64!, $memo:String){
       sendPayment(input: {
         from:$from,
         to:$to,
@@ -353,48 +350,48 @@ class Client():
     res = self._send_query(query, variables)
     return res["data"]
 
-  def listen_new_blocks(self, key: str):
+  def listen_new_blocks(self, pk: str):
     """Creates a subscription for new blocks created by a proposer using a particular private key.
     Blocks until ctl+c
     
     Arguments:
-        key {str} -- The key to use to filter blocks
+        pk {PublicKey} -- The public key to use to filter blocks
     """
     query = '''
-      subscription($key:String){
-        newBlock(key:$key){
-          creator
-          stateHash
-          protocolState {
-            previousStateHash
-            blockchainState {
-              date
-              snarkedLedgerHash
-              stagedLedgerHash
-            }
-          },
-          transactions {
-            userCommands {
-              id
-              isDelegation
-              nonce
-              from
-              to
-              amount
-              fee
-              memo
-            }
-            feeTransfer {
-              recipient
-              fee
-            }
-            coinbase
+    subscription($pk:PublicKey){
+      newBlock(publicKey:$pk){
+        creator
+        stateHash
+        protocolState {
+          previousStateHash
+          blockchainState {
+            date
+            snarkedLedgerHash
+            stagedLedgerHash
           }
+        },
+        transactions {
+          userCommands {
+            id
+            isDelegation
+            nonce
+            from
+            to
+            amount
+            fee
+            memo
+          }
+          feeTransfer {
+            recipient
+            fee
+          }
+          coinbase
         }
       }
+    }
     '''
     variables = {
-      "key": key
+      "pk": pk
     }
     asyncio.run(self._graphql_subscription(query, variables))
 

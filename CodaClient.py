@@ -76,7 +76,7 @@ class Client():
     if response.status_code == 200:
       return response.json()
     else:
-      print(response)
+      print(response.text)
       raise Exception(
           "Query failed -- returned code {}. {}".format(response.status_code, query))
   

@@ -12,7 +12,7 @@ tests_require = ['six', 'pytest', 'pytest-cov', 'python-coveralls', 'mock', 'pys
 
 setup(
     name='CodaClient',
-    version='0.0.6',
+    version='0.0.7',
     python_requires='>=3.5',
     description='A Python wrapper around the Coda Daemon GraphQL API.',
     github='http://github.com/CodaProtocol/coda-python',

@@ -95,22 +95,20 @@ class Client():
     
     uri = self.websocket_endpoint
     async with websockets.connect(uri) as websocket:
+      # Set up Websocket connection
       print("Sending: ", hello_message)
       await websocket.send(json.dumps(hello_message))
       print(await websocket.recv())
       print("Sending: ", query_message)
       await websocket.send(json.dumps(query_message))
-      try:
-        while True:
-          time.sleep(10)
-          response = await websocket.recv()
-          if callback: 
-            callback(response)
-          else:
-            print(response)
-      except KeyboardInterrupt: 
-        return True
 
+      # Iterate over messages in the connection
+      async for message in websocket:
+        if callback: 
+          await callback(message)
+        else:
+          print(message)
+  
   def get_daemon_status(self) -> dict:
     """Gets the status of the currently configured Coda Daemon.
     
@@ -363,7 +361,7 @@ class Client():
       newSyncUpdate 
     }
     '''
-    self._graphql_subscription(query, callback)
+    await self._graphql_subscription(query, callback)
     
   async def listen_block_confirmations(self, callback):
     """Creates a subscription for Block Confirmations
@@ -377,7 +375,7 @@ class Client():
       }
     }
     '''
-    self._graphql_subscription(query, callback)
+    await self._graphql_subscription(query, callback)
 
   async def listen_new_blocks(self, pk: str, callback):
     """Creates a subscription for new blocks created by a proposer using a particular private key.
@@ -421,4 +419,4 @@ class Client():
     variables = {
       "pk": pk
     }
-    self._graphql_subscription(query, variables)
+    await self._graphql_subscription(query, variables)

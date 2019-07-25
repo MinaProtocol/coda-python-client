@@ -80,7 +80,7 @@ class Client():
       raise Exception(
           "Query failed -- returned code {}. {}".format(response.status_code, query))
   
-  async def _graphql_subscription(self, query: str, variables: dict = {}): 
+  async def _graphql_subscription(self, query: str, variables: dict = {}, callback = None): 
     hello_message = {"type": "connection_init", "payload": {}}
 
     # Strip all the whitespace and replace with spaces
@@ -95,18 +95,20 @@ class Client():
     
     uri = self.websocket_endpoint
     async with websockets.connect(uri) as websocket:
+      # Set up Websocket connection
       print("Sending: ", hello_message)
       await websocket.send(json.dumps(hello_message))
       print(await websocket.recv())
       print("Sending: ", query_message)
       await websocket.send(json.dumps(query_message))
-      try:
-        while True:
-          time.sleep(10)
-          print(await websocket.recv())
-      except KeyboardInterrupt: 
-        return True
 
+      # Iterate over messages in the connection
+      async for message in websocket:
+        if callback: 
+          await callback(message)
+        else:
+          print(message)
+  
   def get_daemon_status(self) -> dict:
     """Gets the status of the currently configured Coda Daemon.
     
@@ -350,9 +352,33 @@ class Client():
     res = self._send_query(query, variables)
     return res["data"]
 
-  def listen_new_blocks(self, pk: str):
+
+  async def listen_sync_update(self, callback):
+    """Creates a subscription for Network Sync Updates
+    """
+    query = '''
+    subscription{
+      newSyncUpdate 
+    }
+    '''
+    await self._graphql_subscription(query, callback)
+    
+  async def listen_block_confirmations(self, callback):
+    """Creates a subscription for Block Confirmations
+    Calls callback when a new block is recieved. 
+    """
+    query = '''
+    subscription{
+      blockConfirmation {
+        stateHash
+        numConfirmations
+      }
+    }
+    '''
+    await self._graphql_subscription(query, callback)
+
+  async def listen_new_blocks(self, pk: str, callback):
     """Creates a subscription for new blocks created by a proposer using a particular private key.
-    Blocks until ctl+c
     
     Arguments:
         pk {PublicKey} -- The public key to use to filter blocks
@@ -393,30 +419,4 @@ class Client():
     variables = {
       "pk": pk
     }
-    asyncio.run(self._graphql_subscription(query, variables))
-
-  def listen_block_confirmations(self):
-    """Creates a subscription for Block Confirmations
-    Blocks until ctl+c
-    """
-    query = '''
-    subscription{
-      blockConfirmation {
-        stateHash
-        numConfirmations
-      }
-    }
-    '''
-    asyncio.run(self._graphql_subscription(query))
-
-  def listen_sync_update(self):
-    """Creates a subscription for Network Sync Updates
-    Blocks until ctl+c
-    """
-    query = '''
-    subscription{
-      newSyncUpdate 
-    }
-    '''
-    asyncio.get_event_loop().run_until_complete(self._graphql_subscription(query))
-    asyncio.get_event_loop().run_forever()
+    await self._graphql_subscription(query, variables)

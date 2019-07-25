@@ -361,7 +361,7 @@ class Client():
       newSyncUpdate 
     }
     '''
-    await self._graphql_subscription(query, callback)
+    await self._graphql_subscription(query, {}, callback)
     
   async def listen_block_confirmations(self, callback):
     """Creates a subscription for Block Confirmations
@@ -375,7 +375,7 @@ class Client():
       }
     }
     '''
-    await self._graphql_subscription(query, callback)
+    await self._graphql_subscription(query, {}, callback)
 
   async def listen_new_blocks(self, pk: str, callback):
     """Creates a subscription for new blocks created by a proposer using a particular private key.
@@ -419,4 +419,4 @@ class Client():
     variables = {
       "pk": pk
     }
-    await self._graphql_subscription(query, variables)
+    await self._graphql_subscription(query, variables, callback)

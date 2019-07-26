@@ -12,7 +12,7 @@ tests_require = ['six', 'pytest', 'pytest-cov', 'python-coveralls', 'mock', 'pys
 
 setup(
     name='CodaClient',
-    version='0.0.9',
+    version='0.0.10',
     python_requires='>=3.5',
     description='A Python wrapper around the Coda Daemon GraphQL API.',
     github='http://github.com/CodaProtocol/coda-python',
@@ -22,7 +22,7 @@ setup(
     py_modules=['CodaClient'],
     install_requires=[
         'requests',
-        'websockets',
+        'websockets>=7.0',
         'asyncio'
     ],
     extras_require={
@@ -39,7 +39,6 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Libraries',

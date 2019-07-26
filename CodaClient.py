@@ -5,6 +5,7 @@ import time
 import json
 import asyncio
 import websockets
+import logging
 
 class Client():
   # Implements a GraphQL Client for the Coda Daemon
@@ -19,6 +20,7 @@ class Client():
   ):
     self.endpoint = "{}://{}:{}{}".format(graphql_protocol, graphql_host, graphql_port, graphql_path)
     self.websocket_endpoint = "{}://{}:{}{}".format(websocket_protocol, graphql_host, graphql_port, graphql_path)
+    self.logger = logging.getLogger(__name__)
 
   def _send_query(self, query: str, variables: dict = {}) -> dict:
     """Sends a query to the Coda Daemon's GraphQL Endpoint
@@ -72,8 +74,10 @@ class Client():
     headers = {
       "Accept": "application/json"
     }
+    self.logger.debug("Sending a Query: {}".format(payload))
     response = requests.post(self.endpoint, json=payload, headers=headers)
     if response.status_code == 200:
+      self.logger.debug("Got a Response: {}".format(response.json()))
       return response.json()
     else:
       print(response.text)
@@ -90,20 +94,21 @@ class Client():
       payload = { **payload, 'variables': variables }
     
     query_message = {"id": "1", "type": "start", "payload": payload}
-    print("Listening to GraphQL Subscription, press control+c to exit.")
-    print(json.dumps(payload))
+    self.logger.info("Listening to GraphQL Subscription...")
     
     uri = self.websocket_endpoint
-    async with websockets.connect(uri) as websocket:
-      # Set up Websocket connection
-      print("Sending: ", hello_message)
+    async with websockets.client.connect(uri, ping_timeout=None) as websocket:
+      # Set up Websocket Connection
+      self.logger.debug("WEBSOCKET -- Sending Hello Message: {}".format(hello_message))
       await websocket.send(json.dumps(hello_message))
-      print(await websocket.recv())
-      print("Sending: ", query_message)
+      resp = await websocket.recv()
+      self.logger.debug("WEBSOCKET -- Recieved Response {}".format(resp))
+      self.logger.debug("WEBSOCKET -- Sending Subscribe Query: {}".format(query_message))
       await websocket.send(json.dumps(query_message))
 
-      # Iterate over messages in the connection
+      # Wait for and iterate over messages in the connection
       async for message in websocket:
+        self.logger.debug("Recieved a message from a Subscription: {}".format(message))
         if callback: 
           await callback(message)
         else:

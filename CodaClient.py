@@ -130,7 +130,6 @@ class Client():
         stateHash
         peers
         userCommandsSent
-        runSnarkWorker
         proposePubkeys
         consensusTimeNow
         consensusTimeBestTip

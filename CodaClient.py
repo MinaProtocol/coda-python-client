@@ -125,15 +125,19 @@ class Client():
       daemonStatus {
         numAccounts
         blockchainLength
+        highestBlockLengthReceived
         uptimeSecs
         ledgerMerkleRoot
         stateHash
+        commitId
         peers
         userCommandsSent
-        runSnarkWorker
+        snarkWorker
+        snarkWorkFee
+        syncStatus
         proposePubkeys
-        consensusTimeNow
         consensusTimeBestTip
+        consensusTimeNow
         consensusMechanism
         confDir
         commitId
@@ -214,6 +218,56 @@ class Client():
     }
     res = self._send_query(query, variables)
     return res["data"]
+
+  def get_blocks(self) -> dict:
+    """Gets the blocks known to the Coda Daemon. 
+    Mostly useful for Archive nodes. 
+    
+    Returns:
+        dict -- Returns the "data" field of the JSON Response as a Dict.
+    """
+    query = '''
+    {
+      blocks{
+        nodes {
+          creator
+          stateHash
+          protocolState {
+            previousStateHash
+            blockchainState{
+              date
+              snarkedLedgerHash
+              stagedLedgerHash
+            }
+          }
+          transactions {
+            userCommands{
+              id
+              isDelegation
+              nonce
+              from
+              to
+              amount
+              fee
+              memo
+            }
+            feeTransfer {
+              recipient
+              fee
+            }
+            coinbase
+          }
+          snarkJobs {
+            prover
+            fee
+            workIds
+          }
+        }
+      }
+    }
+    '''
+    res = self._send_query(query)
+    return res["data"]    
 
   def get_current_snark_worker(self) -> dict:
     """Gets the currently configured SNARK Worker from the Coda Daemon. 

@@ -17,7 +17,7 @@ snapshots['TestCodaClient.test_get_daemon_status 1'] = [
                 'Accept': 'application/json'
             },
             'json': {
-                'query': 'query { daemonStatus { numAccounts blockchainLength uptimeSecs ledgerMerkleRoot stateHash peers userCommandsSent runSnarkWorker proposePubkeys consensusTimeNow consensusTimeBestTip consensusMechanism confDir commitId consensusConfiguration { delta k c cTimesK slotsPerEpoch slotDuration epochDuration acceptableNetworkDelay } } }'
+                'query': 'query { daemonStatus { numAccounts blockchainLength highestBlockLengthReceived uptimeSecs ledgerMerkleRoot stateHash commitId peers userCommandsSent snarkWorker snarkWorkFee syncStatus proposePubkeys consensusTimeBestTip consensusTimeNow consensusMechanism confDir commitId consensusConfiguration { delta k c cTimesK slotsPerEpoch slotDuration epochDuration acceptableNetworkDelay } } }'
             }
         }
     ,)

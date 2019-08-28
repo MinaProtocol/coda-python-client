@@ -2,9 +2,9 @@
 
 This module implements a lightweight wrapper around the Coda Daemon's GraphQL Endpoint. It under active development but may not be consistent with the nightly Coda Daemon build. 
 
-**Need Help?** if you're having trouble installing or using this library, (or if you just build something cool with this) join us the [Coda Protocol Discord Server](https://discordapp.com/invite/Vexf4ED) and we can help you out. 
+**Need Help?** if you're having trouble installing or using this library, (or if you just build something cool with this) join us in the [Coda Protocol Discord Server](https://discordapp.com/invite/Vexf4ED) and we can help you out. 
 
-# Pre Reqs
+# Pre Requisites
 
 This library requires `>= Python 3.5`
 

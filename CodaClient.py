@@ -263,6 +263,12 @@ class Client():
             workIds
           }
         }
+        pageInfo {
+          hasNextPage
+          hasPreviousPage
+          firstCursor
+          lastCursor
+        }
       }
     }
     '''

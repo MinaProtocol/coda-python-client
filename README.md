@@ -14,10 +14,12 @@ You can either install the library via Git or the O(1) Labs Artifact Repository.
 
 ## Git 
 
-Install the Library with pip3
+Install the Library with pip3:
+
 `pip3 install git+https://github.com/CodaProtocol/coda-python-client.git`
 
 ## Artifactory 
 
-Install the Library with pip3
+Install the Library with pip3:
+
 `pip3 install --extra-index-url https://o1labs.jfrog.io/o1labs/api/pypi/pypi/simple CodaClient`

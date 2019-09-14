@@ -59,6 +59,13 @@ class TestCodaClient():
         client.get_wallet("pk")
         snapshot.assert_match(mock_post.call_args_list)
 
+    def test_get_transaction_status(self, mock_post, snapshot):
+        mock_post.return_value = self._mock_response(json_data={"data": "foo"})
+
+        client = Client()
+        client.get_transaction_status("payment_id")
+        snapshot.assert_match(mock_post.call_args_list)
+
     def test_get_current_snark_worker(self, mock_post, snapshot):
         mock_post.return_value = self._mock_response(json_data={"data": "foo"})
 

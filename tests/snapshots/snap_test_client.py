@@ -49,7 +49,7 @@ snapshots['TestCodaClient.test_get_wallets 1'] = [
                 'Accept': 'application/json'
             },
             'json': {
-                'query': '{ ownedWallets { publicKey } }'
+                'query': '{ ownedWallets { publicKey balance { total } } }'
             }
         }
     ,)
@@ -156,6 +156,25 @@ snapshots['TestCodaClient.test_create_wallet_no_args 1'] = [
             },
             'json': {
                 'query': 'mutation{ addWallet { publicKey } }'
+            }
+        }
+    ,)
+]
+
+snapshots['TestCodaClient.test_get_transaction_status 1'] = [
+    (
+        (
+            'http://localhost:8304/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
+            },
+            'json': {
+                'query': 'query($paymentId:ID!){ transactionStatus(payment:$paymentId) }',
+                'variables': {
+                    'paymentId': 'payment_id'
+                }
             }
         }
     ,)

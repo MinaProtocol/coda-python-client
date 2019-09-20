@@ -181,6 +181,9 @@ class Client():
     {
       ownedWallets {
         publicKey
+        balance {
+          total
+        }
       }
     }
     '''

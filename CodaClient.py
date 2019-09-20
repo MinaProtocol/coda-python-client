@@ -417,6 +417,25 @@ class Client():
     res = self._send_query(query, variables)
     return res["data"]
 
+  def get_transaction_status(self, payment_id: str) -> dict:
+    """Get the transaction status for the specified Payment Id.
+    
+    Arguments:
+        payment_id {str} -- A Payment Id corresponding to a UserCommand.
+    
+    Returns:
+        dict -- Returns the "data" field of the JSON Response as a Dict.
+    """
+    query = '''
+    query($paymentId:ID!){
+      transactionStatus(payment:$paymentId)
+    }
+    '''
+    variables = {
+      "paymentId": payment_id
+    }
+    res = self._send_query(query, variables)
+    return res["data"]    
 
   async def listen_sync_update(self, callback):
     """Creates a subscription for Network Sync Updates

@@ -506,6 +506,5 @@ class Client():
     }
     '''
     variables = {
-      "pk": pk
     }
     await self._graphql_subscription(query, variables, callback)

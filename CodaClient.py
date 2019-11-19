@@ -76,9 +76,10 @@ class Client():
     }
     self.logger.debug("Sending a Query: {}".format(payload))
     response = requests.post(self.endpoint, json=payload, headers=headers)
-    if response.status_code == 200:
+    resp_json = response.json()
+    if response.status_code == 200 and "errors" not in resp_json:
       self.logger.debug("Got a Response: {}".format(response.json()))
-      return response.json()
+      return resp_json
     else:
       print(response.text)
       raise Exception(
@@ -97,6 +98,7 @@ class Client():
     self.logger.info("Listening to GraphQL Subscription...")
     
     uri = self.websocket_endpoint
+    self.logger.info(uri)
     async with websockets.client.connect(uri, ping_timeout=None) as websocket:
       # Set up Websocket Connection
       self.logger.debug("WEBSOCKET -- Sending Hello Message: {}".format(hello_message))
@@ -464,15 +466,15 @@ class Client():
     '''
     await self._graphql_subscription(query, {}, callback)
 
-  async def listen_new_blocks(self, pk: str, callback):
-    """Creates a subscription for new blocks created by a proposer using a particular private key.
+  async def listen_new_blocks(self, callback):
+    """Creates a subscription for new blocks, calls `callback` each time the subscription fires.
     
     Arguments:
-        pk {PublicKey} -- The public key to use to filter blocks
+        callback(block) {coroutine} -- This coroutine is executed with the new block as an argument each time the subscription fires
     """
     query = '''
-    subscription($pk:PublicKey){
-      newBlock(publicKey:$pk){
+    subscription(){
+      newBlock(){
         creator
         stateHash
         protocolState {

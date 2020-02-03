@@ -138,6 +138,7 @@ class Client():
         snarkWorkFee
         syncStatus
         proposePubkeys
+        nextProposal
         consensusTimeBestTip
         consensusTimeNow
         consensusMechanism
@@ -322,11 +323,17 @@ class Client():
         dict -- Returns the "data" field of the JSON Response as a Dict
     """
     query = '''
-    {
-      syncStatus
+    mutation($worker_pk:PublicKey!, $fee:UInt64!){
+      setSnarkWorker(input: {publicKey:$worker_pk}) {
+        lastSnarkWorker
+      }
+      setSnarkWorkFee(input: {fee:$fee})
+    }'''
+    variables = {
+      "worker_pk": worker_pk,
+      "fee": fee
     }
-    '''
-    res = self._send_query(query)
+    res = self._send_mutation(query, variables)
     return res["data"]
 
   def create_wallet(self) -> dict:

@@ -83,7 +83,7 @@ class Client():
     else:
       print(response.text)
       raise Exception(
-          "Query failed -- returned code {}. {}".format(response.status_code, query))
+          "Query failed -- returned code {}. {} -> {}".format(response.status_code, query, response.json()))
   
   async def _graphql_subscription(self, query: str, variables: dict = {}, callback = None): 
     hello_message = {"type": "connection_init", "payload": {}}
@@ -225,6 +225,56 @@ class Client():
     res = self._send_query(query, variables)
     return res["data"]
 
+  def create_wallet(self, password: str) -> dict:
+    """Creates a new Wallet.
+    
+    Arguments:
+        password {str} -- A password for the wallet to unlock.
+    
+    Returns:
+        dict -- Returns the "data" field of the JSON Response as a Dict.
+    """
+    query = '''
+    mutation ($password: String!) {
+      createAccount(input: {password: $password}) {
+        publicKey
+      }
+    }
+    '''
+    variables = {
+      "password": password
+    }
+    res = self._send_query(query, variables)
+    return res["data"]
+
+  def unlock_wallet(self, pk: str, password: str) -> dict:
+    """Unlocks the wallet for the specified Public Key.
+    
+    Arguments:
+        pk {str} -- A Public Key corresponding to a currently installed wallet.
+        password {str} -- A password for the wallet to unlock.
+    
+    Returns:
+        dict -- Returns the "data" field of the JSON Response as a Dict.
+    """
+    query = '''
+    mutation ($publicKey: PublicKey!, $password: String!) {
+      unlockWallet(input: {publicKey: $publicKey, password: $password}) {
+        account {
+          balance {
+            total
+          }
+        }
+      }
+    }
+    '''
+    variables = {
+      "publicKey": pk,
+      "password": password
+    }
+    res = self._send_query(query, variables)
+    return res["data"]
+
   def get_blocks(self) -> dict:
     """Gets the blocks known to the Coda Daemon. 
     Mostly useful for Archive nodes. 
@@ -334,25 +384,6 @@ class Client():
       "fee": fee
     }
     res = self._send_mutation(query, variables)
-    return res["data"]
-
-  def create_wallet(self) -> dict:
-    """Creates a new wallet and returns the public key.
-    
-    Arguments:
-      N/A
-    
-    Returns:
-        dict -- Returns the "data" field of the JSON Response as a Dict
-    """
-    query = '''
-    mutation{
-      addWallet {
-        publicKey
-      }
-    }
-    '''
-    res = self._send_mutation(query)
     return res["data"]
 
   def send_payment(self, to_pk: str, from_pk: str, amount: int, fee: int, memo: str) -> dict:

@@ -16,7 +16,7 @@ class Client():
       websocket_protocol: str = "ws",
       graphql_host: str = "localhost",
       graphql_path: str = "/graphql",
-      graphql_port: int = 8304,
+      graphql_port: int = 3085,
   ):
     self.endpoint = "{}://{}:{}{}".format(graphql_protocol, graphql_host, graphql_port, graphql_path)
     self.websocket_endpoint = "{}://{}:{}{}".format(websocket_protocol, graphql_host, graphql_port, graphql_path)

@@ -10,18 +10,18 @@ from enum import Enum
 
 class CurrencyFormat(Enum):
   WHOLE = 1
-  MICRO = 2
+  NANO = 2
 
 class CurrencyUnderflow(Exception):
   pass
 
 class Currency():
   @classmethod
-  def __microcodas_from_int(_cls, n):
+  def __nanocodas_from_int(_cls, n):
     return n * 1000000000
 
   @classmethod
-  def __microcodas_from_string(_cls, s):
+  def __nanocodas_from_string(_cls, s):
     segments = s.split('.')
     if len(segments) == 1:
       return int(segments[0])
@@ -35,30 +35,30 @@ class Currency():
   def __init__(self, value, format=CurrencyFormat.WHOLE):
     if format == CurrencyFormat.WHOLE:
       if isinstance(value, int):
-        self.__microcodas = Currency.__microcodas_from_int(value)
+        self.__nanocodas = Currency.__nanocodas_from_int(value)
       elif isinstance(value, float):
-        self.__microcodas = Currency.__microcodas_from_string(str(value))
+        self.__nanocodas = Currency.__nanocodas_from_string(str(value))
       elif isinstance(value, str):
-        self.__microcodas = Currency.__microcodas_from_string(value)
+        self.__nanocodas = Currency.__nanocodas_from_string(value)
       else:
         raise Exception('cannot construct whole Currency from %s' % type(value))
-    elif format == CurrencyFormat.MICRO:
+    elif format == CurrencyFormat.NANO:
       if isinstance(value, int):
-        self.__microcodas = value
+        self.__nanocodas = value
       else:
-        raise Exception('cannot construct micro Currency from %s' % type(value))
+        raise Exception('cannot construct nano Currency from %s' % type(value))
     else:
       raise Exception('invalid Currency format %s' % format)
 
   def decimal_format(self):
-    s = str(self.__microcodas)
+    s = str(self.__nanocodas)
     if len(s) > 9:
       return s[:-9] + '.' + s[-9:]
     else:
       return '0.' + ('0' * (9 - len(s))) + s
 
-  def microcodas(self):
-    return self.__microcodas
+  def nanocodas(self):
+    return self.__nanocodas
 
   def __str__(self):
     return self.decimal_format()
@@ -68,15 +68,15 @@ class Currency():
 
   def __add__(self, other):
     if isinstance(other, Currency):
-      return Currency(self.microcodas() + other.microcodas(), format=CurrencyFormat.MICRO)
+      return Currency(self.nanocodas() + other.nanocodas(), format=CurrencyFormat.NANO)
     else:
       raise Exception('cannot add Currency and %s' % type(other))
 
   def __sub__(self, other):
     if isinstance(other, Currency):
-      new_value = self.microcodas() - other.microcodas()
+      new_value = self.nanocodas() - other.nanocodas()
       if new_value >= 0:
-        return Currency(new_value, format=CurrencyFormat.MICRO)
+        return Currency(new_value, format=CurrencyFormat.NANO)
       else:
         raise CurrencyUnderflow()
     else:
@@ -84,9 +84,9 @@ class Currency():
 
   def __mul__(self, other):
     if isinstance(other, int):
-      return Currency(self.microcodas() * other, format=CurrencyFormat.MICRO)
+      return Currency(self.nanocodas() * other, format=CurrencyFormat.NANO)
     elif isinstance(other, Currency):
-      return Currency(self.microcodas() * other.microcodas(), format=CurrencyFormat.MICRO)
+      return Currency(self.nanocodas() * other.nanocodas(), format=CurrencyFormat.NANO)
     else:
       raise Exception('cannot multiply Currency and %s' % type(other))
 
@@ -507,8 +507,8 @@ class Client():
     variables = {
       "from": from_pk,
       "to": to_pk,
-      "amount": amount.microcodas(),
-      "fee": fee.microcodas(),
+      "amount": amount.nanocodas(),
+      "fee": fee.nanocodas(),
       "memo": memo
     }
     res = self._send_mutation(query, variables)

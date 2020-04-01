@@ -16,7 +16,7 @@ def test_constructor_whole_string():
 
 def test_constructor_nano_int():
   n = 500
-  assert Currency(n, format=CurrencyFormat.MICRO)
+  assert Currency(n, format=CurrencyFormat.NANO)
 
 def test_add():
   assert (Currency(5) + Currency(2)).nanocodas() == 7 * precision
@@ -37,4 +37,4 @@ def test_mul_int():
   assert (Currency(5) * 2).nanocodas() == 10 * precision
 
 def test_mul_currency():
-  assert (Currency(5) * Currency(2, format=CurrencyFormat.MICRO)).nanocodas() == 10 * precision
+  assert (Currency(5) * Currency(2, format=CurrencyFormat.NANO)).nanocodas() == 10 * precision

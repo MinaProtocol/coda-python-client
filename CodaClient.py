@@ -10,6 +10,12 @@ import logging
 from enum import Enum
 
 class CurrencyFormat(Enum):
+  """An Enum representing different formats of Currency in coda.
+
+  Constants:
+      WHOLE - represents whole coda (1 whole coda == 10^9 nanocodas)
+      NANO - represents the atomic unit of coda
+  """
   WHOLE = 1
   NANO = 2
 
@@ -17,6 +23,14 @@ class CurrencyUnderflow(Exception):
   pass
 
 class Currency():
+  """A convenience wrapper around interacting with coda currency values.
+
+  This class supports performing math on Currency values of differing formats.
+  Currency instances can be added or subtracted. Currency instances can also be
+  scaled through multiplication (either against another Currency instance or a
+  int scalar).
+  """
+
   @classmethod
   def __nanocodas_from_int(_cls, n):
     return n * 1000000000
@@ -35,6 +49,15 @@ class Currency():
 
   @classmethod
   def random(_cls, lower_bound, upper_bound):
+    """Generates a random Currency instance between a provided lower_bound and upper_bound
+
+    Arguments:
+        lower_bound {Currency} -- A Currency instance representing the lower bound for the randomly generated value
+        upper_bound {Currency} -- A Currency instance representing the upper bound for the randomly generated value
+
+    Returns:
+        Currency - A randomly generated Currency instance between the lower_bound and upper_bound
+    """
     if not (isinstance(lower_bound, Currency) and isinstance(upper_bound, Currency)):
       raise Exception('invalid call to Currency.random: lower and upper bound must be instances of Currency')
     if not upper_bound.nanocodas() >= lower_bound.nanocodas():
@@ -46,6 +69,18 @@ class Currency():
     return lower_bound + Currency(delta, format=CurrencyFormat.NANO)
 
   def __init__(self, value, format=CurrencyFormat.WHOLE):
+    """Constructs a new Currency instance. Values of different CurrencyFormats may be passed in to construct the instance.
+
+    Arguments:
+        value {int|float|string} - The value to construct the Currency instance from
+        format {CurrencyFormat} - The representation format of the value
+
+    Return:
+        Currency - The newly constructed Currency instance
+
+    In the case of format=CurrencyFormat.WHOLE, then it is interpreted as value * 10^9 nanocodas.
+    In the case of format=CurrencyFormat.NANO, value is only allowed to be an int, as there can be no decimal point for nanocodas.
+    """
     if format == CurrencyFormat.WHOLE:
       if isinstance(value, int):
         self.__nanocodas = Currency.__nanocodas_from_int(value)
@@ -64,6 +99,11 @@ class Currency():
       raise Exception('invalid Currency format %s' % format)
 
   def decimal_format(self):
+    """Computes the string decimal format representation of a Currency instance.
+
+    Return:
+        str - The decimal format representation of the Currency instance
+    """
     s = str(self.__nanocodas)
     if len(s) > 9:
       return s[:-9] + '.' + s[-9:]
@@ -71,6 +111,11 @@ class Currency():
       return '0.' + ('0' * (9 - len(s))) + s
 
   def nanocodas(self):
+    """Accesses the raw nanocodas representation of a Currency instance.
+
+    Return:
+        int - The nanocodas of the Currency instance represented as an integer
+    """
     return self.__nanocodas
 
   def __str__(self):

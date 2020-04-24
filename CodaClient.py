@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import random
 import requests
 import time
 import json
@@ -31,6 +32,18 @@ class Currency():
         return int(l + r + ('0' * (9 - len(r))))
       else:
         raise Exception('invalid coda currency format: %s' % s)
+
+  @classmethod
+  def random(_cls, lower_bound, upper_bound):
+    if not (isinstance(lower_bound, Currency) and isinstance(upper_bound, Currency)):
+      raise Exception('invalid call to Currency.random: lower and upper bound must be instances of Currency')
+    if not upper_bound.nanocodas() >= lower_bound.nanocodas():
+      raise Exception('invalid call to Currency.random: upper_bound is not greater than lower_bound')
+    if lower_bound == upper_bound:
+      return lower_bound
+    bound_range = upper_bound.nanocodas() - lower_bound.nanocodas()
+    delta = random.randint(0, bound_range)
+    return lower_bound + Currency(delta, format=CurrencyFormat.NANO)
 
   def __init__(self, value, format=CurrencyFormat.WHOLE):
     if format == CurrencyFormat.WHOLE:

@@ -38,3 +38,9 @@ def test_mul_int():
 
 def test_mul_currency():
   assert (Currency(5) * Currency(2, format=CurrencyFormat.NANO)).nanocodas() == 10 * precision
+
+def test_random():
+  assert (Currency.random(Currency(5), Currency(5)).nanocodas() == 5 * precision)
+  for _ in range(25):
+    rand = Currency.random(Currency(3, format=CurrencyFormat.NANO), Currency(5, format=CurrencyFormat.NANO))
+    assert (3 <= rand.nanocodas () and rand.nanocodas() <= 5)

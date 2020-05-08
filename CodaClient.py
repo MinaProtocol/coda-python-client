@@ -9,6 +9,7 @@ import websockets
 import logging
 from enum import Enum
 
+
 class CurrencyFormat(Enum):
   """An Enum representing different formats of Currency in coda.
 
@@ -19,8 +20,10 @@ class CurrencyFormat(Enum):
   WHOLE = 1
   NANO = 2
 
+
 class CurrencyUnderflow(Exception):
   pass
+
 
 class Currency():
   """A convenience wrapper around interacting with coda currency values.
@@ -58,10 +61,15 @@ class Currency():
     Returns:
         Currency - A randomly generated Currency instance between the lower_bound and upper_bound
     """
-    if not (isinstance(lower_bound, Currency) and isinstance(upper_bound, Currency)):
-      raise Exception('invalid call to Currency.random: lower and upper bound must be instances of Currency')
+    if not (isinstance(lower_bound, Currency) and
+            isinstance(upper_bound, Currency)):
+      raise Exception(
+          'invalid call to Currency.random: lower and upper bound must be instances of Currency'
+      )
     if not upper_bound.nanocodas() >= lower_bound.nanocodas():
-      raise Exception('invalid call to Currency.random: upper_bound is not greater than lower_bound')
+      raise Exception(
+          'invalid call to Currency.random: upper_bound is not greater than lower_bound'
+      )
     if lower_bound == upper_bound:
       return lower_bound
     bound_range = upper_bound.nanocodas() - lower_bound.nanocodas()
@@ -126,7 +134,8 @@ class Currency():
 
   def __add__(self, other):
     if isinstance(other, Currency):
-      return Currency(self.nanocodas() + other.nanocodas(), format=CurrencyFormat.NANO)
+      return Currency(
+          self.nanocodas() + other.nanocodas(), format=CurrencyFormat.NANO)
     else:
       raise Exception('cannot add Currency and %s' % type(other))
 
@@ -144,9 +153,11 @@ class Currency():
     if isinstance(other, int):
       return Currency(self.nanocodas() * other, format=CurrencyFormat.NANO)
     elif isinstance(other, Currency):
-      return Currency(self.nanocodas() * other.nanocodas(), format=CurrencyFormat.NANO)
+      return Currency(
+          self.nanocodas() * other.nanocodas(), format=CurrencyFormat.NANO)
     else:
       raise Exception('cannot multiply Currency and %s' % type(other))
+
 
 class Client():
   # Implements a GraphQL Client for the Coda Daemon
@@ -159,8 +170,11 @@ class Client():
       graphql_path: str = "/graphql",
       graphql_port: int = 3085,
   ):
-    self.endpoint = "{}://{}:{}{}".format(graphql_protocol, graphql_host, graphql_port, graphql_path)
-    self.websocket_endpoint = "{}://{}:{}{}".format(websocket_protocol, graphql_host, graphql_port, graphql_path)
+    self.endpoint = "{}://{}:{}{}".format(graphql_protocol, graphql_host,
+                                          graphql_port, graphql_path)
+    self.websocket_endpoint = "{}://{}:{}{}".format(websocket_protocol,
+                                                    graphql_host, graphql_port,
+                                                    graphql_path)
     self.logger = logging.getLogger(__name__)
 
   def _send_query(self, query: str, variables: dict = {}) -> dict:
@@ -190,7 +204,7 @@ class Client():
         dict -- A Response object from the GraphQL Server.
     """
     return self._graphql_request(query, variables)
-  
+
   def _graphql_request(self, query: str, variables: dict = {}):
     """GraphQL queries all look alike, this is a generic function to facilitate a GraphQL Request.
     
@@ -210,11 +224,9 @@ class Client():
     query = " ".join(query.split())
     payload = {'query': query}
     if variables:
-      payload = { **payload, 'variables': variables }
+      payload = {**payload, 'variables': variables}
 
-    headers = {
-      "Accept": "application/json"
-    }
+    headers = {"Accept": "application/json"}
     self.logger.debug("Sending a Query: {}".format(payload))
     response = requests.post(self.endpoint, json=payload, headers=headers)
     resp_json = response.json()
@@ -223,40 +235,46 @@ class Client():
       return resp_json
     else:
       print(response.text)
-      raise Exception(
-          "Query failed -- returned code {}. {} -> {}".format(response.status_code, query, response.json()))
-  
-  async def _graphql_subscription(self, query: str, variables: dict = {}, callback = None): 
+      raise Exception("Query failed -- returned code {}. {} -> {}".format(
+          response.status_code, query, response.json()))
+
+  async def _graphql_subscription(self,
+                                  query: str,
+                                  variables: dict = {},
+                                  callback=None):
     hello_message = {"type": "connection_init", "payload": {}}
 
     # Strip all the whitespace and replace with spaces
     query = " ".join(query.split())
     payload = {'query': query}
     if variables:
-      payload = { **payload, 'variables': variables }
-    
+      payload = {**payload, 'variables': variables}
+
     query_message = {"id": "1", "type": "start", "payload": payload}
     self.logger.info("Listening to GraphQL Subscription...")
-    
+
     uri = self.websocket_endpoint
     self.logger.info(uri)
     async with websockets.client.connect(uri, ping_timeout=None) as websocket:
       # Set up Websocket Connection
-      self.logger.debug("WEBSOCKET -- Sending Hello Message: {}".format(hello_message))
+      self.logger.debug(
+          "WEBSOCKET -- Sending Hello Message: {}".format(hello_message))
       await websocket.send(json.dumps(hello_message))
       resp = await websocket.recv()
       self.logger.debug("WEBSOCKET -- Recieved Response {}".format(resp))
-      self.logger.debug("WEBSOCKET -- Sending Subscribe Query: {}".format(query_message))
+      self.logger.debug(
+          "WEBSOCKET -- Sending Subscribe Query: {}".format(query_message))
       await websocket.send(json.dumps(query_message))
 
       # Wait for and iterate over messages in the connection
       async for message in websocket:
-        self.logger.debug("Recieved a message from a Subscription: {}".format(message))
-        if callback: 
+        self.logger.debug(
+            "Recieved a message from a Subscription: {}".format(message))
+        if callback:
           await callback(message)
         else:
           print(message)
-  
+
   def get_daemon_status(self) -> dict:
     """Gets the status of the currently configured Coda Daemon.
     
@@ -360,9 +378,7 @@ class Client():
       }
     }
     '''
-    variables = {
-      "publicKey": pk
-    }
+    variables = {"publicKey": pk}
     res = self._send_query(query, variables)
     return res["data"]
 
@@ -382,9 +398,7 @@ class Client():
       }
     }
     '''
-    variables = {
-      "password": password
-    }
+    variables = {"password": password}
     res = self._send_query(query, variables)
     return res["data"]
 
@@ -409,10 +423,7 @@ class Client():
       }
     }
     '''
-    variables = {
-      "publicKey": pk,
-      "password": password
-    }
+    variables = {"publicKey": pk, "password": password}
     res = self._send_query(query, variables)
     return res["data"]
 
@@ -470,7 +481,7 @@ class Client():
     }
     '''
     res = self._send_query(query)
-    return res["data"]    
+    return res["data"]
 
   def get_current_snark_worker(self) -> dict:
     """Gets the currently configured SNARK Worker from the Coda Daemon. 
@@ -503,7 +514,7 @@ class Client():
     res = self._send_query(query)
     return res["data"]
 
-  def set_current_snark_worker(self, worker_pk: str, fee: str) -> dict: 
+  def set_current_snark_worker(self, worker_pk: str, fee: str) -> dict:
     """Set the current SNARK Worker preference. 
     
     Arguments:
@@ -520,14 +531,12 @@ class Client():
       }
       setSnarkWorkFee(input: {fee:$fee})
     }'''
-    variables = {
-      "worker_pk": worker_pk,
-      "fee": fee
-    }
+    variables = {"worker_pk": worker_pk, "fee": fee}
     res = self._send_mutation(query, variables)
     return res["data"]
 
-  def send_payment(self, to_pk: str, from_pk: str, amount: Currency, fee: Currency, memo: str) -> dict:
+  def send_payment(self, to_pk: str, from_pk: str, amount: Currency,
+                   fee: Currency, memo: str) -> dict:
     """Send a payment from the specified wallet to the specified target wallet. 
     
     Arguments:
@@ -563,11 +572,11 @@ class Client():
     }
     '''
     variables = {
-      "from": from_pk,
-      "to": to_pk,
-      "amount": amount.nanocodas(),
-      "fee": fee.nanocodas(),
-      "memo": memo
+        "from": from_pk,
+        "to": to_pk,
+        "amount": amount.nanocodas(),
+        "fee": fee.nanocodas(),
+        "memo": memo
     }
     res = self._send_mutation(query, variables)
     return res["data"]
@@ -595,9 +604,7 @@ class Client():
       }
     }
     '''
-    variables = {
-      "publicKey": pk
-    }
+    variables = {"publicKey": pk}
     res = self._send_query(query, variables)
     return res["data"]
 
@@ -615,11 +622,9 @@ class Client():
       transactionStatus(payment:$paymentId)
     }
     '''
-    variables = {
-      "paymentId": payment_id
-    }
+    variables = {"paymentId": payment_id}
     res = self._send_query(query, variables)
-    return res["data"]    
+    return res["data"]
 
   async def listen_sync_update(self, callback):
     """Creates a subscription for Network Sync Updates
@@ -630,7 +635,7 @@ class Client():
     }
     '''
     await self._graphql_subscription(query, {}, callback)
-    
+
   async def listen_block_confirmations(self, callback):
     """Creates a subscription for Block Confirmations
     Calls callback when a new block is recieved. 
@@ -684,6 +689,5 @@ class Client():
       }
     }
     '''
-    variables = {
-    }
+    variables = {}
     await self._graphql_subscription(query, variables, callback)

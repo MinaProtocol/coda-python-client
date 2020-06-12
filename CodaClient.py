@@ -266,35 +266,66 @@ class Client():
     query = '''
     query {
       daemonStatus {
-        numAccounts
+        addrsAndPorts {
+          bindIp
+          clientPort
+          externalIp
+          libp2pPort
+          peer {
+            host
+            libp2pPort
+            peerId
+          }
+        }
+        blockProductionKeys
         blockchainLength
-        highestBlockLengthReceived
-        uptimeSecs
-        ledgerMerkleRoot
-        stateHash
         commitId
-        peers
-        userCommandsSent
-        snarkWorker
-        snarkWorkFee
-        syncStatus
-        proposePubkeys
-        nextProposal
-        consensusTimeBestTip
-        consensusTimeNow
-        consensusMechanism
         confDir
-        commitId
         consensusConfiguration {
-          delta
-          k
+          acceptableNetworkDelay
           c
           cTimesK
-          slotsPerEpoch
-          slotDuration
+          delta
           epochDuration
-          acceptableNetworkDelay
+          genesisStateTimestamp
+          k
+          slotDuration
+          slotsPerEpoch
         }
+        consensusMechanism
+        consensusTimeBestTip {
+          endTime
+          epoch
+          globalSlot
+          slot
+          startTime
+        }
+        consensusTimeNow {
+          endTime
+          epoch
+          globalSlot
+          slot
+          startTime
+        }
+        highestBlockLengthReceived
+        ledgerMerkleRoot
+        nextBlockProduction {
+          times {
+            endTime
+            epoch
+            globalSlot
+            slot
+            startTime
+          }
+        }
+        numAccounts
+        peers
+        snarkWorkFee
+        snarkWorker
+        stateHash
+        syncStatus
+        uptimeSecs
+        userCommandsSent
       }
     }
     '''

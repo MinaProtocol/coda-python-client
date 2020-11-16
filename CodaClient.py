@@ -278,21 +278,34 @@ class Client():
         snarkWorker
         snarkWorkFee
         syncStatus
-        proposePubkeys
-        nextProposal
+        blockProductionKeys
+        nextBlockProduction {
+          times {
+            endTime
+            epoch
+            globalSlot
+            slot
+            startTime
+          }
+        }
+        consensusTimeNow {
+          startTime
+          endTime
+          epoch
+          globalSlot
+          slot
+        }
         consensusTimeBestTip
-        consensusTimeNow
         consensusMechanism
         confDir
         commitId
         consensusConfiguration {
-          delta
-          k
-          c
-          cTimesK
           slotsPerEpoch
           slotDuration
+          k
+          genesisStateTimestamp
           epochDuration
+          delta
           acceptableNetworkDelay
         }
       }

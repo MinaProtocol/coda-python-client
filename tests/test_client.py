@@ -83,10 +83,10 @@ class TestCodaClient:
         mock_post.return_value = self._mock_response(json_data={"data": "foo"})
 
         client = Client()
-        client.set_current_snark_worker("pk", "fee")
+        client.set_current_snark_worker("pk", 1)
         snapshot.assert_match(mock_post.call_args_list)
 
-    def test_create_wallet_no_args(self, mock_post, snapshot):
+    def test_create_wallet(self, mock_post, snapshot):
         mock_post.return_value = self._mock_response(json_data={"data": "foo"})
 
         client = Client()
@@ -100,4 +100,28 @@ class TestCodaClient:
         currency = Currency(1)
         fee = Currency(0.1)
         client.send_payment("to_pk", "from_pk", currency, fee, "memo")
+        snapshot.assert_match(mock_post.call_args_list)
+
+    def test_get_best_chain(self, mock_post, snapshot):
+        mock_post.return_value = self._mock_response(json_data={"data": "foo"})
+
+        client = Client()
+        max_length = 42
+        client.get_best_chain(max_length=max_length)
+        snapshot.assert_match(mock_post.call_args_list)
+
+    def test_get_block_by_height(self, mock_post, snapshot):
+        mock_post.return_value = self._mock_response(json_data={"data": "foo"})
+
+        client = Client()
+        height = 42
+        client.get_block_by_height(height=height)
+        snapshot.assert_match(mock_post.call_args_list)
+
+    def test_get_block_by_state_hash(self, mock_post, snapshot):
+        mock_post.return_value = self._mock_response(json_data={"data": "foo"})
+
+        client = Client()
+        state_hash = "some_state_hash"
+        client.get_block_by_state_hash(state_hash=state_hash)
         snapshot.assert_match(mock_post.call_args_list)

@@ -435,6 +435,7 @@ class Client:
 
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict.
+            dict -- Returns the "data" field of the JSON Response as a Dict.
         """
         query = """
         mutation($password: String!) {
@@ -449,11 +450,11 @@ class Client:
 
     def unlock_wallet(self, pk: str, password: str) -> dict:
         """Unlocks the wallet for the specified Public Key.
-    
+
         Args:
-            pk {str} -- A Public Key corresponding to a currently installed
+            pk: Public Key corresponding to a currently installed
               wallet.
-            password {str} -- A password for the wallet to unlock.
+            password: password for the wallet to unlock.
 
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict.
@@ -506,13 +507,13 @@ class Client:
         res = self._send_query(query)
         return res["data"]
 
-    def set_current_snark_worker(self, worker_pk: str, fee: str) -> dict:
+    def set_current_snark_worker(self, worker_pk: str, fee: int) -> dict:
         """Set the current SNARK Worker preference. 
     
         Args:
-            worker_pk {str} -- The public key corresponding to the desired SNARK
+            worker_pk: the public key corresponding to the desired SNARK
               Worker
-            fee {str} -- The desired SNARK Work fee
+            fee: the desired SNARK Work fee
 
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict
@@ -534,13 +535,13 @@ class Client:
         """Send a payment from the specified wallet to specified target wallet.
     
         Args:
-            to_pk {PublicKey} -- The target wallet where funds should be sent
-            from_pk {PublicKey} -- The installed wallet which will finance the
+            to_pk: The target wallet where funds should be sent
+            from_pk: The installed wallet which will finance the
               payment
-            amount {UInt64} -- Tha amount of Coda to send
-            fee {UInt64} -- The transaction fee that will be attached to the
-              payment
-            memo {str} -- A memo to attach to the payment
+            amount: Currency instance. The amount of Coda to send
+            fee: Currency instance. The transaction fee that will be attached to
+              the payment
+            memo:  memo to attach to the payment
 
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict
@@ -583,7 +584,7 @@ class Client:
         """Get the current transactions in the payments pool.
     
         Args:
-            pk {str} -- The public key corresponding to the installed wallet
+            pk: The public key corresponding to the installed wallet
               that will be queried
 
         Returns:
@@ -611,7 +612,7 @@ class Client:
         """Get the transaction status for the specified Payment Id.
     
         Args:
-            payment_id {str} -- A Payment Id corresponding to a UserCommand.
+            payment_id: Payment Id corresponding to a UserCommand.
 
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict.
@@ -622,6 +623,92 @@ class Client:
         }
         """
         variables = {"paymentId": payment_id}
+        res = self._send_query(query, variables)
+        return res["data"]
+
+    def get_best_chain(self, max_length: int = 10) -> dict:
+        """Get the best blockHeight and stateHash for the canonical chain.
+
+        Returns max_length items in descending order
+
+        Args:
+          max_length: defaults to 10
+
+        Returns:
+            dict -- Returns the "data" field of the JSON Response as a Dict.
+        """
+        query = """
+        query ($maxLength: Int!) {
+          bestChain(maxLength: $maxLength) {
+            protocolState {
+              consensusState {
+                blockHeight
+              }
+              previousStateHash
+            }
+            stateHash
+          }
+        }
+        """
+        variables = {"maxLength": max_length}
+        res = self._send_query(query, variables)
+        return res["data"]
+
+    def get_block_by_height(self, height: int) -> dict:
+        """Get the block data by block height.
+
+        Returns stateHash, block creator and snarkJobs
+
+        Args:
+          height: block height
+
+        Returns:
+            dict -- Returns the "data" field of the JSON Response as a Dict.
+        """
+        query = """
+        query ($height: Int!) {
+          block(height: $height) {
+            stateHash
+            creator
+            snarkJobs {
+              fee
+              prover
+            }
+          }
+        }
+        """
+        variables = {"height": height}
+        res = self._send_query(query, variables)
+        return res["data"]
+
+    def get_block_by_state_hash(self, state_hash: str) -> dict:
+        """Get the block data by state hash.
+
+        Returns block height, block creator and snarkJobs
+
+        Args:
+          state_hash: state hash
+
+        Returns:
+            dict -- Returns the "data" field of the JSON Response as a Dict.
+        """
+        query = """
+        query ($stateHash: String!) {
+          block(stateHash: $stateHash) {
+            creator
+            protocolState {
+              consensusState {
+                blockHeight
+              }
+            }
+            snarkJobs {
+              fee
+              prover
+            }
+          }
+        }
+        """
+        variables = {"stateHash": state_hash}
         res = self._send_query(query, variables)
         return res["data"]
 

@@ -350,7 +350,11 @@ class Client:
               }
             }
             numAccounts
-            peers
+            peers {
+              host
+              libp2pPort
+              peerId
+            }
             snarkWorkFee
             snarkWorker
             stateHash

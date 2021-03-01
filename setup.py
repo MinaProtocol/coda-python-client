@@ -14,7 +14,7 @@ setup(
     name="CodaClient",
     version="0.0.14",
     python_requires=">=3.5",
-    description="A Python wrapper around the Coda Daemon GraphQL API.",
+    description="A Python wrapper around the Mina Daemon GraphQL API.",
     github="http://github.com/CodaProtocol/coda-python",
     author="Conner Swann",
     author_email="conner@o1labs.org",

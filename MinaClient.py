@@ -10,11 +10,11 @@ import websockets
 
 
 class CurrencyFormat(Enum):
-    """An Enum representing different formats of Currency in coda.
+    """An Enum representing different formats of Currency in mina.
 
     Constants:
-        WHOLE - represents whole coda (1 whole coda == 10^9 nanocodas)
-        NANO - represents the atomic unit of coda
+        WHOLE - represents whole mina (1 whole mina == 10^9 nanominas)
+        NANO - represents the atomic unit of mina
     """
 
     WHOLE = 1
@@ -26,7 +26,7 @@ class CurrencyUnderflow(Exception):
 
 
 class Currency:
-    """A convenience wrapper around interacting with coda currency values.
+    """A convenience wrapper around interacting with mina currency values.
 
     This class supports performing math on Currency values of differing formats.
     Currency instances can be added or subtracted. Currency instances can also
@@ -34,11 +34,11 @@ class Currency:
     or a int scalar).
     """
     @classmethod
-    def __nanocodas_from_int(_cls, n):
+    def __nanominas_from_int(_cls, n):
         return n * 1000000000
 
     @classmethod
-    def __nanocodas_from_string(_cls, s):
+    def __nanominas_from_string(_cls, s):
         segments = s.split(".")
         if len(segments) == 1:
             return int(segments[0])
@@ -47,7 +47,7 @@ class Currency:
             if len(r) <= 9:
                 return int(l + r + ("0" * (9 - len(r))))
             else:
-                raise Exception("invalid coda currency format: %s" % s)
+                raise Exception("invalid mina currency format: %s" % s)
 
     @classmethod
     def random(_cls, lower_bound, upper_bound):
@@ -70,13 +70,13 @@ class Currency:
             raise Exception(
                 "invalid call to Currency.random: lower and upper bound must "
                 "be instances of Currency")
-        if not upper_bound.nanocodas() >= lower_bound.nanocodas():
+        if not upper_bound.nanominas() >= lower_bound.nanominas():
             raise Exception(
                 "invalid call to Currency.random: upper_bound is not greater "
                 "than lower_bound")
         if lower_bound == upper_bound:
             return lower_bound
-        bound_range = upper_bound.nanocodas() - lower_bound.nanocodas()
+        bound_range = upper_bound.nanominas() - lower_bound.nanominas()
         delta = random.randint(0, bound_range)
         return lower_bound + Currency(delta, format=CurrencyFormat.NANO)
 
@@ -86,9 +86,9 @@ class Currency:
         Values of different CurrencyFormats may be passed in to construct the
         instance.
         In the case of format=CurrencyFormat.WHOLE, then it is interpreted as
-        value * 10^9 nanocodas.
+        value * 10^9 nanominas.
         In the case of format=CurrencyFormat.NANO, value is only allowed to be
-        an int, as there can be no decimal point for nanocodas.
+        an int, as there can be no decimal point for nanominas.
 
         Args:
             value {int|float|string} - The value to construct the Currency
@@ -100,17 +100,17 @@ class Currency:
         """
         if format == CurrencyFormat.WHOLE:
             if isinstance(value, int):
-                self.__nanocodas = Currency.__nanocodas_from_int(value)
+                self.__nanominas = Currency.__nanominas_from_int(value)
             elif isinstance(value, float):
-                self.__nanocodas = Currency.__nanocodas_from_string(str(value))
+                self.__nanominas = Currency.__nanominas_from_string(str(value))
             elif isinstance(value, str):
-                self.__nanocodas = Currency.__nanocodas_from_string(value)
+                self.__nanominas = Currency.__nanominas_from_string(value)
             else:
                 raise Exception("cannot construct whole Currency from %s" %
                                 type(value))
         elif format == CurrencyFormat.NANO:
             if isinstance(value, int):
-                self.__nanocodas = value
+                self.__nanominas = value
             else:
                 raise Exception("cannot construct nano Currency from %s" %
                                 type(value))
@@ -123,20 +123,20 @@ class Currency:
         Returns:
             str - The decimal format representation of the Currency instance
         """
-        s = str(self.__nanocodas)
+        s = str(self.__nanominas)
         if len(s) > 9:
             return s[:-9] + "." + s[-9:]
         else:
             return "0." + ("0" * (9 - len(s))) + s
 
-    def nanocodas(self):
-        """Accesses the raw nanocodas representation of a Currency instance.
+    def nanominas(self):
+        """Accesses the raw nanominas representation of a Currency instance.
 
         Returns:
-            int - The nanocodas of the Currency instance represented as an
+            int - The nanominas of the Currency instance represented as an
               integer
         """
-        return self.__nanocodas
+        return self.__nanominas
 
     def __str__(self):
         return self.decimal_format()
@@ -146,14 +146,14 @@ class Currency:
 
     def __add__(self, other):
         if isinstance(other, Currency):
-            return Currency(self.nanocodas() + other.nanocodas(),
+            return Currency(self.nanominas() + other.nanominas(),
                             format=CurrencyFormat.NANO)
         else:
             raise Exception("cannot add Currency and %s" % type(other))
 
     def __sub__(self, other):
         if isinstance(other, Currency):
-            new_value = self.nanocodas() - other.nanocodas()
+            new_value = self.nanominas() - other.nanominas()
             if new_value >= 0:
                 return Currency(new_value, format=CurrencyFormat.NANO)
             else:
@@ -163,17 +163,17 @@ class Currency:
 
     def __mul__(self, other):
         if isinstance(other, int):
-            return Currency(self.nanocodas() * other,
+            return Currency(self.nanominas() * other,
                             format=CurrencyFormat.NANO)
         elif isinstance(other, Currency):
-            return Currency(self.nanocodas() * other.nanocodas(),
+            return Currency(self.nanominas() * other.nanominas(),
                             format=CurrencyFormat.NANO)
         else:
             raise Exception("cannot multiply Currency and %s" % type(other))
 
 
 class Client:
-    # Implements a GraphQL Client for the Coda Daemon
+    # Implements a GraphQL Client for the Mina Daemon
 
     def __init__(
         self,
@@ -190,7 +190,7 @@ class Client:
         self.logger = logging.getLogger(__name__)
 
     def _send_query(self, query: str, variables: dict = {}) -> dict:
-        """Sends a query to the Coda Daemon's GraphQL Endpoint
+        """Sends a query to the Mina Daemon's GraphQL Endpoint
     
         Args:
             query {str} -- A GraphQL Query
@@ -202,7 +202,7 @@ class Client:
         return self._graphql_request(query, variables)
 
     def _send_mutation(self, query: str, variables: dict = {}) -> dict:
-        """Sends a mutation to the Coda Daemon's GraphQL Endpoint.
+        """Sends a mutation to the Mina Daemon's GraphQL Endpoint.
     
         Args:
             query {str} -- A GraphQL Mutation
@@ -291,7 +291,7 @@ class Client:
                     print(message)
 
     def get_daemon_status(self) -> dict:
-        """Gets the status of the currently configured Coda Daemon.
+        """Gets the status of the currently configured Mina Daemon.
     
         Returns:
              dict -- Returns the "data" field of the JSON Response as a Dict.
@@ -364,7 +364,7 @@ class Client:
         return res["data"]
 
     def get_daemon_version(self) -> dict:
-        """Gets the version of the currently configured Coda Daemon.
+        """Gets the version of the currently configured Mina Daemon.
     
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict.
@@ -378,7 +378,7 @@ class Client:
         return res["data"]
 
     def get_wallets(self) -> dict:
-        """Gets the wallets that are currently installed in the Coda Daemon.
+        """Gets the wallets that are currently installed in the Mina Daemon.
 
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict.
@@ -475,7 +475,7 @@ class Client:
         return res["data"]
 
     def get_current_snark_worker(self) -> dict:
-        """Gets the currently configured SNARK Worker from the Coda Daemon. 
+        """Gets the currently configured SNARK Worker from the Mina Daemon.
     
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict.
@@ -492,7 +492,7 @@ class Client:
         return res["data"]
 
     def get_sync_status(self) -> dict:
-        """Gets the Sync Status of the Coda Daemon.
+        """Gets the Sync Status of the Mina Daemon.
     
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict.
@@ -538,7 +538,7 @@ class Client:
             to_pk: The target wallet where funds should be sent
             from_pk: The installed wallet which will finance the
               payment
-            amount: Currency instance. The amount of Coda to send
+            amount: Currency instance. The amount of Mina to send
             fee: Currency instance. The transaction fee that will be attached to
               the payment
             memo:  memo to attach to the payment
@@ -573,8 +573,8 @@ class Client:
         variables = {
             "from": from_pk,
             "to": to_pk,
-            "amount": amount.nanocodas(),
-            "fee": fee.nanocodas(),
+            "amount": amount.nanominas(),
+            "fee": fee.nanominas(),
             "memo": memo,
         }
         res = self._send_mutation(query, variables)

@@ -1,12 +1,12 @@
 import mock
 
-from CodaClient import Client, Currency
+from MinaClient import Client, Currency
 
 
 @mock.patch("requests.post")
-class TestCodaClient:
+class TestMinaClient:
     """
-    Tests the CodaClient.Client class
+    Tests the MinaClient.Client class
     """
     def _mock_response(
         self,

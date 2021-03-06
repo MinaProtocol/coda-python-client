@@ -6,7 +6,11 @@ import random
 from enum import Enum
 
 import requests
+import sgqlc
 import websockets
+from sgqlc.operation import Operation
+
+from mina_schema import mina_schema
 
 
 class CurrencyFormat(Enum):
@@ -189,6 +193,20 @@ class Client:
             websocket_protocol, graphql_host, graphql_port, graphql_path)
         self.logger = logging.getLogger(__name__)
 
+    def _send_sgqlc_query(self,
+                          query: sgqlc.operation.Operation,
+                          variables: dict = {}) -> dict:
+        """Sends a query to the Mina Daemon's GraphQL Endpoint
+
+        Args:
+            query {str} -- A GraphQL Query
+            variables {dict} -- Optional Variables for the query (default: {{}})
+
+        Returns:
+            dict -- A Response object from the GraphQL Server.
+        """
+        return self._graphql_request(bytes(query).decode('utf-8'), variables)
+
     def _send_query(self, query: str, variables: dict = {}) -> dict:
         """Sends a query to the Mina Daemon's GraphQL Endpoint
     
@@ -233,9 +251,13 @@ class Client:
         """
         # Strip all the whitespace and replace with spaces
         query = " ".join(query.split())
+        #print(query)
         payload = {"query": query}
         if variables:
             payload = {**payload, "variables": variables}
+
+        #print(payload)
+        #print(type(payload))
 
         headers = {"Accept": "application/json"}
         self.logger.debug("Sending a Query: {}".format(payload))
@@ -290,82 +312,29 @@ class Client:
                 else:
                     print(message)
 
-    def get_daemon_status(self) -> dict:
+    def get_daemon_status(self, fields: list = None) -> dict:
         """Gets the status of the currently configured Mina Daemon.
     
         Returns:
              dict -- Returns the "data" field of the JSON Response as a Dict.
         """
-        query = """
-        query {
-          daemonStatus {
-            addrsAndPorts {
-              bindIp
-              clientPort
-              externalIp
-              libp2pPort
-              peer {
-                host
-                libp2pPort
-                peerId
-              }
-            }
-            blockProductionKeys
-            blockchainLength
-            commitId
-            confDir
-            consensusConfiguration {
-              acceptableNetworkDelay
-              delta
-              epochDuration
-              genesisStateTimestamp
-              k
-              slotDuration
-              slotsPerEpoch
-            }
-            consensusMechanism
-            consensusTimeBestTip {
-              endTime
-              epoch
-              globalSlot
-              slot
-              startTime
-            }
-            consensusTimeNow {
-              endTime
-              epoch
-              globalSlot
-              slot
-              startTime
-            }
-            highestBlockLengthReceived
-            ledgerMerkleRoot
-            nextBlockProduction {
-              times {
-                endTime
-                epoch
-                globalSlot
-                slot
-                startTime
-              }
-            }
-            numAccounts
-            peers {
-              host
-              libp2pPort
-              peerId
-            }
-            snarkWorkFee
-            snarkWorker
-            stateHash
-            syncStatus
-            uptimeSecs
-            userCommandsSent
-          }
-        }
-        """
-        res = self._send_query(query)
+        if not fields:
+            fields = []
+
+        op = Operation(mina_schema.query)
+        op.daemon_status().__fields__(*fields)
+
+        res = self._send_sgqlc_query(op)
+
         return res["data"]
+
+    def get_sync_status(self) -> dict:
+        """Gets the Sync Status of the Mina Daemon.
+
+        Returns:
+            dict -- Returns the "data" field of the JSON Response as a Dict.
+        """
+        return self.get_daemon_status(fields=['sync_status'])
 
     def get_daemon_version(self) -> dict:
         """Gets the version of the currently configured Mina Daemon.
@@ -373,34 +342,31 @@ class Client:
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict.
         """
-        query = """
-        {
-          version
-        }
-        """
-        res = self._send_query(query)
+        op = Operation(mina_schema.query)
+        op.version()
+
+        res = self._send_sgqlc_query(op)
         return res["data"]
 
-    def get_wallets(self) -> dict:
+    def get_wallets(self, fields: list = None) -> dict:
         """Gets the wallets that are currently installed in the Mina Daemon.
 
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict.
         """
-        query = """
-        {
-          ownedWallets {
-            publicKey
-            balance {
-              total
-            }
-          }
-        }
-        """
-        res = self._send_query(query)
+
+        default_fields = ['public_key', 'balance']
+
+        fields = [] if isinstance(fields,
+                                  list) and not len(fields) else default_fields
+
+        op = Operation(mina_schema.query)
+        op.owned_wallets().__fields__(*fields)
+
+        res = self._send_sgqlc_query(op)
         return res["data"]
 
-    def get_wallet(self, pk: str) -> dict:
+    def get_wallet(self, pk: str, fields: list = None) -> dict:
         """Gets the wallet for the specified Public Key.
     
         Args:
@@ -410,25 +376,18 @@ class Client:
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict.
         """
-        query = """
-        query($publicKey: PublicKey!) {
-          wallet(publicKey: $publicKey) {
-            publicKey
-            balance {
-              total
-              unknown
-            }
-            nonce
-            receiptChainHash
-            delegate
-            votingFor
-            stakingActive
-            privateKeyPath
-          }
-        }
-        """
-        variables = {"publicKey": pk}
-        res = self._send_query(query, variables)
+        default_fields = [
+            'balance', 'nonce', 'receipt_chain_hash', 'delegate', 'voting_for',
+            'staking_active', 'private_key_path'
+        ]
+
+        fields = [] if isinstance(fields,
+                                  list) and not len(fields) else default_fields
+
+        op = Operation(mina_schema.query)
+        op.wallet(public_key=pk).__fields__(*fields)
+
+        res = self._send_sgqlc_query(op)
         return res["data"]
 
     def create_wallet(self, password: str) -> dict:
@@ -439,17 +398,11 @@ class Client:
 
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict.
-            dict -- Returns the "data" field of the JSON Response as a Dict.
         """
-        query = """
-        mutation($password: String!) {
-          createAccount(input: { password: $password }) {
-            publicKey
-          }
-        }
-        """
-        variables = {"password": password}
-        res = self._send_query(query, variables)
+
+        op = Operation(mina_schema.mutation)
+        op.create_account(input={'password': password})
+        res = self._send_sgqlc_query(op)
         return res["data"]
 
     def unlock_wallet(self, pk: str, password: str) -> dict:
@@ -463,52 +416,42 @@ class Client:
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict.
         """
-        query = """
-        mutation($publicKey: PublicKey!, $password: String!) {
-          unlockWallet(input: { publicKey: $publicKey, password: $password }) {
-            account {
-              balance {
-                total
-              }
-            }
-          }
-        }
-        """
-        variables = {"publicKey": pk, "password": password}
-        res = self._send_query(query, variables)
+        op = Operation(mina_schema.mutation)
+        op.unlock_wallet(input={'public_key': pk, 'password': password})
+        res = self._send_sgqlc_query(op)
         return res["data"]
 
-    def get_current_snark_worker(self) -> dict:
+    def lock_wallet(self, pk: str, password: str) -> dict:
+        """Unlocks the wallet for the specified Public Key.
+
+        Args:
+            pk: Public Key corresponding to a currently installed
+              wallet.
+            password: password for the wallet to unlock.
+
+        Returns:
+            dict -- Returns the "data" field of the JSON Response as a Dict.
+        """
+        op = Operation(mina_schema.mutation)
+        op.lock_wallet(input={'public_key': pk, 'password': password})
+        res = self._send_sgqlc_query(op)
+        return res["data"]
+
+    def get_current_snark_worker(self, fields: list = None) -> dict:
         """Gets the currently configured SNARK Worker from the Mina Daemon.
     
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict.
         """
-        query = """
-        {
-          currentSnarkWorker {
-            key
-            fee
-          }
-        }
-        """
-        res = self._send_query(query)
-        return res["data"]
+        default_fields = ['key', 'fee']
 
-    def get_sync_status(self) -> dict:
-        """Gets the Sync Status of the Mina Daemon.
-    
-        Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict.
-        """
-        query = """
-        {
-          daemonStatus {
-            syncStatus
-          }
-        }
-        """
-        res = self._send_query(query)
+        fields = [] if isinstance(fields,
+                                  list) and not len(fields) else default_fields
+
+        op = Operation(mina_schema.query)
+        op.current_snark_worker().__fields__(*fields)
+
+        res = self._send_sgqlc_query(op)
         return res["data"]
 
     def set_current_snark_worker(self, worker_pk: str, fee: int) -> dict:
@@ -522,16 +465,10 @@ class Client:
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict
         """
-        query = """
-        mutation($worker_pk: PublicKey!, $fee: UInt64!) {
-          setSnarkWorker(input: { publicKey: $worker_pk }) {
-            lastSnarkWorker
-          }
-          setSnarkWorkFee(input: { fee: $fee })
-        }
-        """
-        variables = {"worker_pk": worker_pk, "fee": fee}
-        res = self._send_mutation(query, variables)
+        op = Operation(mina_schema.mutation)
+        op.set_snark_worker(input={'public_key': worker_pk})
+        op.set_snark_work_fee(input={'fee': fee})
+        res = self._send_sgqlc_query(op)
         return res["data"]
 
     def send_payment(self, to_pk: str, from_pk: str, amount: Currency,
@@ -550,38 +487,24 @@ class Client:
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict
         """
-        query = """
-        mutation(
-          $from: PublicKey!
-          $to: PublicKey!
-          $amount: UInt64!
-          $fee: UInt64!
-          $memo: String
-        ) {
-          sendPayment(
-            input: { from: $from, to: $to, amount: $amount, fee: $fee, memo: $memo }
-          ) {
-            payment {
-              id
-              isDelegation
-              nonce
-              from
-              to
-              amount
-              fee
-              memo
-            }
-          }
-        }
-        """
-        variables = {
-            "from": from_pk,
-            "to": to_pk,
-            "amount": amount.nanominas(),
-            "fee": fee.nanominas(),
-            "memo": memo,
-        }
-        res = self._send_mutation(query, variables)
+
+        #TODO(Jan): add this once cconnected to a differetn testaccount
+        default_fields = [
+            'id', 'isDelegation', 'nonce', 'from', 'to', 'amount', 'fee',
+            'memo'
+        ]
+
+        op = Operation(mina_schema.mutation)
+        op.send_payment(
+            input={
+                "from": from_pk,
+                "to": to_pk,
+                "fee": fee.nanominas(),
+                "memo": memo,
+                "amount": amount.nanominas(),
+            })
+        res = self._send_sgqlc_query(op)
+
         return res["data"]
 
     def get_pooled_payments(self, pk: str) -> dict:
@@ -715,6 +638,116 @@ class Client:
         variables = {"stateHash": state_hash}
         res = self._send_query(query, variables)
         return res["data"]
+
+    def send_any_query(self, query, variables=None):
+        if not variables:
+            variables = {}
+        #print(query)
+
+        res = self._send_query(query, variables)
+        #print(res)
+        return res["data"]
+
+    def get_schema(self):
+        query = """
+query IntrospectionQuery(
+  $includeDescription: Boolean!,
+  $includeDeprecated: Boolean!,
+) {
+  __schema {
+    queryType { name }
+    mutationType { name }
+    subscriptionType { name }
+    types {
+      ...FullType
+    }
+    directives {
+      name
+      description @include(if: $includeDescription)
+      locations
+      args {
+        ...InputValue
+      }
+    }
+  }
+}
+fragment FullType on __Type {
+  kind
+  name
+  description @include(if: $includeDescription)
+  fields(includeDeprecated: $includeDeprecated) {
+    name
+    description @include(if: $includeDescription)
+    args {
+      ...InputValue
+    }
+    type {
+      ...TypeRef
+    }
+    isDeprecated @include(if: $includeDeprecated)
+    deprecationReason @include(if: $includeDeprecated)
+  }
+  inputFields {
+    ...InputValue
+  }
+  interfaces {
+    ...TypeRef
+  }
+  enumValues(includeDeprecated: $includeDeprecated) {
+    name
+    description @include(if: $includeDescription)
+    isDeprecated @include(if: $includeDeprecated)
+    deprecationReason @include(if: $includeDeprecated)
+  }
+  possibleTypes {
+    ...TypeRef
+  }
+}
+fragment InputValue on __InputValue {
+  name
+  description @include(if: $includeDescription)
+  type { ...TypeRef }
+  defaultValue
+}
+fragment TypeRef on __Type {
+  kind
+  name
+  ofType {
+    kind
+    name
+    ofType {
+      kind
+      name
+      ofType {
+        kind
+        name
+        ofType {
+          kind
+          name
+          ofType {
+            kind
+            name
+            ofType {
+              kind
+              name
+              ofType {
+                kind
+                name
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}     
+        """
+        variables = {
+            'includeDescription': True,
+            'includeDeprecated': False,
+        }
+        res = self._send_query(query, variables)
+        return res
 
     async def listen_sync_update(self, callback):
         """Creates a subscription for Network Sync Updates. """

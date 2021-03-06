@@ -642,112 +642,11 @@ class Client:
     def send_any_query(self, query, variables=None):
         if not variables:
             variables = {}
-        #print(query)
 
         res = self._send_query(query, variables)
-        #print(res)
         return res["data"]
 
-    def get_schema(self):
-        query = """
-query IntrospectionQuery(
-  $includeDescription: Boolean!,
-  $includeDeprecated: Boolean!,
-) {
-  __schema {
-    queryType { name }
-    mutationType { name }
-    subscriptionType { name }
-    types {
-      ...FullType
-    }
-    directives {
-      name
-      description @include(if: $includeDescription)
-      locations
-      args {
-        ...InputValue
-      }
-    }
-  }
-}
-fragment FullType on __Type {
-  kind
-  name
-  description @include(if: $includeDescription)
-  fields(includeDeprecated: $includeDeprecated) {
-    name
-    description @include(if: $includeDescription)
-    args {
-      ...InputValue
-    }
-    type {
-      ...TypeRef
-    }
-    isDeprecated @include(if: $includeDeprecated)
-    deprecationReason @include(if: $includeDeprecated)
-  }
-  inputFields {
-    ...InputValue
-  }
-  interfaces {
-    ...TypeRef
-  }
-  enumValues(includeDeprecated: $includeDeprecated) {
-    name
-    description @include(if: $includeDescription)
-    isDeprecated @include(if: $includeDeprecated)
-    deprecationReason @include(if: $includeDeprecated)
-  }
-  possibleTypes {
-    ...TypeRef
-  }
-}
-fragment InputValue on __InputValue {
-  name
-  description @include(if: $includeDescription)
-  type { ...TypeRef }
-  defaultValue
-}
-fragment TypeRef on __Type {
-  kind
-  name
-  ofType {
-    kind
-    name
-    ofType {
-      kind
-      name
-      ofType {
-        kind
-        name
-        ofType {
-          kind
-          name
-          ofType {
-            kind
-            name
-            ofType {
-              kind
-              name
-              ofType {
-                kind
-                name
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}     
-        """
-        variables = {
-            'includeDescription': True,
-            'includeDeprecated': False,
-        }
-        res = self._send_query(query, variables)
-        return res
+
 
     async def listen_sync_update(self, callback):
         """Creates a subscription for Network Sync Updates. """

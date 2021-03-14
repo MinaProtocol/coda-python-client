@@ -37,6 +37,7 @@ class Currency:
     be scaled through multiplication (either against another Currency instance
     or a int scalar).
     """
+
     @classmethod
     def __nanominas_from_int(_cls, n):
         return n * 1000000000
@@ -69,15 +70,18 @@ class Currency:
             Currency - A randomly generated Currency instance between the
               lower_bound and upper_bound
         """
-        if not (isinstance(lower_bound, Currency)
-                and isinstance(upper_bound, Currency)):
+        if not (
+            isinstance(lower_bound, Currency) and isinstance(upper_bound, Currency)
+        ):
             raise Exception(
                 "invalid call to Currency.random: lower and upper bound must "
-                "be instances of Currency")
+                "be instances of Currency"
+            )
         if not upper_bound.nanominas() >= lower_bound.nanominas():
             raise Exception(
                 "invalid call to Currency.random: upper_bound is not greater "
-                "than lower_bound")
+                "than lower_bound"
+            )
         if lower_bound == upper_bound:
             return lower_bound
         bound_range = upper_bound.nanominas() - lower_bound.nanominas()
@@ -110,14 +114,12 @@ class Currency:
             elif isinstance(value, str):
                 self.__nanominas = Currency.__nanominas_from_string(value)
             else:
-                raise Exception("cannot construct whole Currency from %s" %
-                                type(value))
+                raise Exception("cannot construct whole Currency from %s" % type(value))
         elif format == CurrencyFormat.NANO:
             if isinstance(value, int):
                 self.__nanominas = value
             else:
-                raise Exception("cannot construct nano Currency from %s" %
-                                type(value))
+                raise Exception("cannot construct nano Currency from %s" % type(value))
         else:
             raise Exception("invalid Currency format %s" % format)
 
@@ -150,8 +152,9 @@ class Currency:
 
     def __add__(self, other):
         if isinstance(other, Currency):
-            return Currency(self.nanominas() + other.nanominas(),
-                            format=CurrencyFormat.NANO)
+            return Currency(
+                self.nanominas() + other.nanominas(), format=CurrencyFormat.NANO
+            )
         else:
             raise Exception("cannot add Currency and %s" % type(other))
 
@@ -167,11 +170,11 @@ class Currency:
 
     def __mul__(self, other):
         if isinstance(other, int):
-            return Currency(self.nanominas() * other,
-                            format=CurrencyFormat.NANO)
+            return Currency(self.nanominas() * other, format=CurrencyFormat.NANO)
         elif isinstance(other, Currency):
-            return Currency(self.nanominas() * other.nanominas(),
-                            format=CurrencyFormat.NANO)
+            return Currency(
+                self.nanominas() * other.nanominas(), format=CurrencyFormat.NANO
+            )
         else:
             raise Exception("cannot multiply Currency and %s" % type(other))
 
@@ -187,15 +190,17 @@ class Client:
         graphql_path: str = "/graphql",
         graphql_port: int = 3085,
     ):
-        self.endpoint = "{}://{}:{}{}".format(graphql_protocol, graphql_host,
-                                              graphql_port, graphql_path)
+        self.endpoint = "{}://{}:{}{}".format(
+            graphql_protocol, graphql_host, graphql_port, graphql_path
+        )
         self.websocket_endpoint = "{}://{}:{}{}".format(
-            websocket_protocol, graphql_host, graphql_port, graphql_path)
+            websocket_protocol, graphql_host, graphql_port, graphql_path
+        )
         self.logger = logging.getLogger(__name__)
 
-    def _send_sgqlc_query(self,
-                          query: sgqlc.operation.Operation,
-                          variables: dict = {}) -> dict:
+    def _send_sgqlc_query(
+        self, query: sgqlc.operation.Operation, variables: dict = {}
+    ) -> dict:
         """Sends a query to the Mina Daemon's GraphQL Endpoint
 
         Args:
@@ -267,12 +272,13 @@ class Client:
         else:
             raise Exception(
                 "Query failed -- returned code {}. {} -> {}".format(
-                    response.status_code, query, response.json()))
+                    response.status_code, query, response.json()
+                )
+            )
 
-    async def _graphql_subscription(self,
-                                    query: str,
-                                    variables: dict = {},
-                                    callback=None):
+    async def _graphql_subscription(
+        self, query: str, variables: dict = {}, callback=None
+    ):
         hello_message = {"type": "connection_init", "payload": {}}
 
         if isinstance(query, sgqlc.operation.Operation):
@@ -290,24 +296,24 @@ class Client:
         uri = self.websocket_endpoint
         self.logger.info(uri)
 
-        async with websockets.client.connect(uri,
-                                             ping_timeout=None) as websocket:
+        async with websockets.client.connect(uri, ping_timeout=None) as websocket:
             # Set up Websocket Connection
             self.logger.debug(
-                "WEBSOCKET -- Sending Hello Message: {}".format(hello_message))
+                "WEBSOCKET -- Sending Hello Message: {}".format(hello_message)
+            )
             await websocket.send(json.dumps(hello_message))
             resp = await websocket.recv()
             self.logger.debug("WEBSOCKET -- Recieved Response {}".format(resp))
             self.logger.debug(
-                "WEBSOCKET -- Sending Subscribe Query: {}".format(
-                    query_message))
+                "WEBSOCKET -- Sending Subscribe Query: {}".format(query_message)
+            )
             await websocket.send(json.dumps(query_message))
 
             # Wait for and iterate over messages in the connection
             async for message in websocket:
                 self.logger.debug(
-                    "Recieved a message from a Subscription: {}".format(
-                        message))
+                    "Recieved a message from a Subscription: {}".format(message)
+                )
                 if callback:
                     await callback(message)
                 else:
@@ -537,9 +543,7 @@ class Client:
         res = self._send_sgqlc_query(op)
         return res["data"]
 
-    def get_pooled_payments(self,
-                            pk: str = None,
-                            all_fields: bool = False) -> dict:
+    def get_pooled_payments(self, pk: str = None, all_fields: bool = False) -> dict:
         """Get the current transactions in the payments pool.
     
         Args:
@@ -551,9 +555,7 @@ class Client:
             dict -- Returns the "data" field of the JSON Response as a Dict
         """
 
-        default_fields = [
-            "from_", "to", "amount", "id", "is_delegation", "nonce"
-        ]
+        default_fields = ["from_", "to", "amount", "id", "is_delegation", "nonce"]
 
         op = Operation(mina_schema.query_type)
         if pk:
@@ -582,9 +584,7 @@ class Client:
         res = self._send_sgqlc_query(op)
         return res["data"]
 
-    def get_best_chain(self,
-                       max_length: int = 10,
-                       all_fields: bool = False) -> dict:
+    def get_best_chain(self, max_length: int = 10, all_fields: bool = False) -> dict:
         """Get the best blockHeight and stateHash for the canonical chain.
 
         Returns max_length items in descending order
@@ -607,9 +607,7 @@ class Client:
         res = self._send_sgqlc_query(op)
         return res["data"]
 
-    def get_block_by_height(self,
-                            height: int,
-                            all_fields: bool = False) -> dict:
+    def get_block_by_height(self, height: int, all_fields: bool = False) -> dict:
         """Get the block data by block height.
 
         Returns stateHash, block creator and snarkJobs
@@ -632,9 +630,9 @@ class Client:
         res = self._send_sgqlc_query(op)
         return res["data"]
 
-    def get_block_by_state_hash(self,
-                                state_hash: str,
-                                all_fields: bool = False) -> dict:
+    def get_block_by_state_hash(
+        self, state_hash: str, all_fields: bool = False
+    ) -> dict:
         """Get the block data by state hash.
 
         Returns block height, block creator and snarkJobs

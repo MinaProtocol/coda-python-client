@@ -327,7 +327,7 @@ class Client:
         """
 
         op = Operation(mina_schema.query)
-        op.daemon_status()
+        op.daemon_status().__to_graphql__(auto_select_depth=3)
 
         res = self._send_sgqlc_query(op)
 

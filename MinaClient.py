@@ -327,9 +327,11 @@ class Client:
         """
 
         op = Operation(mina_schema.query)
-        op.daemon_status().__to_graphql__(auto_select_depth=3)
+        op.daemon_status()
 
-        res = self._send_sgqlc_query(op)
+        #tbd: such cases - it all depends on the final usecase
+        #notice the rewrite and the _send_query
+        res = self._send_query(op.__to_graphql__(auto_select_depth=3))
 
         return res["data"]
 

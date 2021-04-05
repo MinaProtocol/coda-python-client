@@ -189,10 +189,14 @@ class Client:
         graphql_host: str = "localhost",
         graphql_path: str = "/graphql",
         graphql_port: int = 3085,
+        endpoint: str = None
     ):
-        self.endpoint = "{}://{}:{}{}".format(
-            graphql_protocol, graphql_host, graphql_port, graphql_path
-        )
+        if endpoint:
+            self.endpoint = endpoint
+        else:
+            self.endpoint = "{}://{}:{}{}".format(
+                graphql_protocol, graphql_host, graphql_port, graphql_path
+            )
         self.websocket_endpoint = "{}://{}:{}{}".format(
             websocket_protocol, graphql_host, graphql_port, graphql_path
         )
@@ -264,8 +268,10 @@ class Client:
 
         headers = {"Accept": "application/json"}
         self.logger.debug("Sending a Query: {}".format(payload))
+        print(f"using: {self.endpoint}")
         response = requests.post(self.endpoint, json=payload, headers=headers)
         resp_json = response.json()
+
         if response.status_code == 200 and "errors" not in resp_json:
             self.logger.debug("Got a Response: {}".format(response.json()))
             return resp_json

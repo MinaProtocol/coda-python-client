@@ -189,7 +189,7 @@ class Client:
         graphql_host: str = "localhost",
         graphql_path: str = "/graphql",
         graphql_port: int = 3085,
-        endpoint: str = None
+        endpoint: str = None,
     ):
         if endpoint:
             self.endpoint = endpoint
@@ -335,8 +335,8 @@ class Client:
         op = Operation(mina_schema.query)
         op.daemon_status()
 
-        #tbd: such cases - it all depends on the final usecase
-        #notice the rewrite and the _send_query
+        # tbd: such cases - it all depends on the final usecase
+        # notice the rewrite and the _send_query
         res = self._send_query(op.__to_graphql__(auto_select_depth=3))
 
         return res["data"]
@@ -498,13 +498,7 @@ class Client:
         return res["data"]
 
     def send_payment(
-        self,
-        to_pk: str,
-        from_pk: str,
-        amount: Currency,
-        fee: Currency,
-        memo: str,
-        all_fields: bool = False,
+        self, to_pk: str, from_pk: str, amount: Currency, fee: Currency, memo: str
     ) -> dict:
         """Send a payment from the specified wallet to specified target wallet.
     
@@ -522,17 +516,6 @@ class Client:
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict
         """
-        # test in devnet
-        default_fields = [
-            "id",
-            "is_delegation",
-            "nonce",
-            "from",
-            "to",
-            "amount",
-            "fee",
-            "memo",
-        ]
 
         input_dict = {
             "from": from_pk,
@@ -544,9 +527,6 @@ class Client:
 
         op = Operation(mina_schema.mutation)
         op.send_payment(input=input_dict)
-
-        if not all_fields:
-            op.send_payment(input=input_dict).__fields__(*default_fields)
 
         res = self._send_sgqlc_query(op)
         return res["data"]

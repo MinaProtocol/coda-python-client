@@ -289,9 +289,6 @@ class Client:
     ):
         hello_message = {"type": "connection_init", "payload": {}}
 
-        if isinstance(query, sgqlc.operation.Operation):
-            query = bytes(query).decode("utf-8")
-
         # Strip all the whitespace and replace with spaces
         query = " ".join(query.split())
         payload = {"query": query}
@@ -661,7 +658,8 @@ class Client:
         op = Operation(mina_schema.subscription_type)
         op.new_sync_update()
         variables = {}
-        await self._graphql_subscription(op, variables, callback)
+        query = bytes(op).decode("utf-8")
+        await self._graphql_subscription(query, variables, callback)
 
     async def listen_new_blocks(self, callback):
         """Creates a subscription for new blocks.
@@ -676,4 +674,5 @@ class Client:
         op = Operation(mina_schema.subscription_type)
         op.new_block()
         variables = {}
-        await self._graphql_subscription(op, variables, callback)
+        query = bytes(op).decode("utf-8")
+        await self._graphql_subscription(query, variables, callback)

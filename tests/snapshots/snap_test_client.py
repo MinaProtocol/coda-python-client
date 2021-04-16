@@ -209,7 +209,7 @@ snapshots['TestMinaClient.test_send_payment 1'] = [
                 'Accept': 'application/json'
             },
             'json': {
-                'query': 'mutation { sendPayment(input: {memo: "memo", fee: 100000000, amount: 1000000000, to: "to_pk", from: "from_pk"}) { payment { id hash kind nonce token amount feeToken fee memo isDelegation from to } } }'
+                'query': 'mutation { sendPayment(input: {memo: "memo", fee: 100000000, amount: 1000000000, to: "to_pk", from: "from_pk"}) { payment { id hash kind nonce token amount feeToken fee memo isDelegation from to failureReason } } }'
             }
         }
     ,)

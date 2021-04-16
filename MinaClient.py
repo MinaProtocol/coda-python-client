@@ -10,7 +10,7 @@ import sgqlc
 import websockets
 from sgqlc.operation import Operation
 
-from mina_schema import mina_schema
+from mina_schemas import mina_schema
 
 
 class CurrencyFormat(Enum):
@@ -179,6 +179,9 @@ class Currency:
             raise Exception("cannot multiply Currency and %s" % type(other))
 
 
+
+
+
 class Client:
     # Implements a GraphQL Client for the Mina Daemon
 
@@ -267,8 +270,7 @@ class Client:
             payload = {**payload, "variables": variables}
 
         headers = {"Accept": "application/json"}
-        self.logger.debug("Sending a Query: {}".format(payload))
-        print(f"using: {self.endpoint}")
+        self.logger.debug(f"Sending a Query: {payload} via {self.endpoint}")
         response = requests.post(self.endpoint, json=payload, headers=headers)
         resp_json = response.json()
 
@@ -335,10 +337,7 @@ class Client:
         op = Operation(mina_schema.query)
         op.daemon_status()
 
-        # tbd: such cases - it all depends on the final usecase
-        # notice the rewrite and the _send_query
-        res = self._send_query(op.__to_graphql__(auto_select_depth=3))
-
+        res = self._send_sgqlc_query(op)
         return res["data"]
 
     def get_sync_status(self) -> dict:
@@ -352,7 +351,7 @@ class Client:
         op.daemon_status().__fields__("sync_status")
 
         res = self._send_sgqlc_query(op)
-        return res
+        return res["data"]
 
     def get_daemon_version(self) -> dict:
         """Gets the version of the currently configured Mina Daemon.
@@ -525,8 +524,10 @@ class Client:
             "amount": amount.nanominas(),
         }
 
+        send_payment_input = mina_schema.SendPaymentInput(input_dict)
+
         op = Operation(mina_schema.mutation)
-        op.send_payment(input=input_dict)
+        op.send_payment(input=send_payment_input)
 
         res = self._send_sgqlc_query(op)
         return res["data"]

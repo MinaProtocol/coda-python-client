@@ -17,8 +17,8 @@ class CurrencyFormat(Enum):
     """An Enum representing different formats of Currency in mina.
 
     Constants:
-        WHOLE - represents whole mina (1 whole mina == 10^9 nanominas)
-        NANO - represents the atomic unit of mina
+        WHOLE: represents whole mina (1 whole mina == 10^9 nanominas)
+        NANO: represents the atomic unit of mina
     """
 
     WHOLE = 1
@@ -99,12 +99,12 @@ class Currency:
         an int, as there can be no decimal point for nanominas.
 
         Args:
-            value {int|float|string} - The value to construct the Currency
+            value {int|float|string}: The value to construct the Currency
               instance from format {CurrencyFormat} - The representation format
               of the value
 
         Returns:
-            Currency - The newly constructed Currency instance
+            Currency: The newly constructed Currency instance
         """
         if format == CurrencyFormat.WHOLE:
             if isinstance(value, int):
@@ -139,7 +139,7 @@ class Currency:
         """Accesses the raw nanominas representation of a Currency instance.
 
         Returns:
-            int - The nanominas of the Currency instance represented as an
+            The nanominas of the Currency instance represented as an
               integer
         """
         return self.__nanominas
@@ -179,9 +179,6 @@ class Currency:
             raise Exception("cannot multiply Currency and %s" % type(other))
 
 
-
-
-
 class Client:
     # Implements a GraphQL Client for the Mina Daemon
 
@@ -211,11 +208,11 @@ class Client:
         """Sends a query to the Mina Daemon's GraphQL Endpoint
 
         Args:
-            query {str} -- A GraphQL Query
-            variables {dict} -- Optional Variables for the query (default: {{}})
+            query: sgqlc Operation
+            variables: Optional Variables for the query
 
         Returns:
-            dict -- A Response object from the GraphQL Server.
+            dict: A Response object from the GraphQL Server.
         """
 
         return self._graphql_request(bytes(query).decode("utf-8"), variables)
@@ -224,11 +221,11 @@ class Client:
         """Sends a query to the Mina Daemon's GraphQL Endpoint
     
         Args:
-            query {str} -- A GraphQL Query
-            variables {dict} -- Optional Variables for the query (default: {{}})
+            query: a GraphQL Query string
+            variables: Optional Variables dict for the query
 
         Returns:
-            dict -- A Response object from the GraphQL Server.
+            dict: A Response object from the GraphQL Server.
         """
         return self._graphql_request(query, variables)
 
@@ -236,11 +233,11 @@ class Client:
         """Sends a mutation to the Mina Daemon's GraphQL Endpoint.
     
         Args:
-            query {str} -- A GraphQL Mutation
-            variables {dict} -- Variables for the mutation (default: {{}})
+            query: a GraphQL Query string
+            variables: Optional Variables dict for the query
 
         Returns:
-            dict -- A Response object from the GraphQL Server.
+            dict: A Response object from the GraphQL Server.
         """
         return self._graphql_request(query, variables)
 
@@ -251,12 +248,11 @@ class Client:
         facilitate a GraphQL Request.
     
         Args:
-            query {str} -- A GraphQL Query
-            variables {dict} -- Optional Variables for the GraphQL Query
-              (default: {{}})
+            query: a GraphQL Query string
+            variables: Optional Variables dict for the query
 
         Returns:
-            dict -- Returns the JSON Response as a Dict.
+            JSON Response as a Dict.
 
         Raises:
             Exception: Raises an exception if the response is anything other
@@ -285,7 +281,7 @@ class Client:
             )
 
     async def _graphql_subscription(
-        self, query: str, variables: dict = {}, callback=None
+        self, query: str, variables: dict = {}, callback=None, ping_timeout=20
     ):
         hello_message = {"type": "connection_init", "payload": {}}
 
@@ -301,7 +297,9 @@ class Client:
         uri = self.websocket_endpoint
         self.logger.info(uri)
 
-        async with websockets.client.connect(uri, ping_timeout=None) as websocket:
+        async with websockets.client.connect(
+            uri, ping_timeout=ping_timeout
+        ) as websocket:
             # Set up Websocket Connection
             self.logger.debug(
                 "WEBSOCKET -- Sending Hello Message: {}".format(hello_message)
@@ -328,7 +326,7 @@ class Client:
         """Gets the status of the currently configured Mina Daemon.
     
         Returns:
-             dict -- Returns the "data" field of the JSON Response as a Dict.
+             dict, the "data" field of the JSON Response.
         """
 
         op = Operation(mina_schema.query)
@@ -341,7 +339,7 @@ class Client:
         """Gets the Sync Status of the Mina Daemon.
 
         Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict.
+            dict, the "data" field of the JSON Response.
         """
 
         op = Operation(mina_schema.query)
@@ -354,7 +352,7 @@ class Client:
         """Gets the version of the currently configured Mina Daemon.
     
         Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict.
+            dict, the "data" field of the JSON Response.
         """
         op = Operation(mina_schema.query)
         op.version()
@@ -365,14 +363,18 @@ class Client:
     def get_wallets(self, all_fields: bool = False) -> dict:
         """Gets the wallets that are currently installed in the Mina Daemon.
 
+        Args:
+            all_fields: return all available fields in response
+
         Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict.
+            dict, the "data" field of the JSON Response.
         """
 
         default_fields = ["public_key", "balance"]
 
         op = Operation(mina_schema.query)
         op.owned_wallets()
+
         if not all_fields:
             op.owned_wallets().__fields__(*default_fields)
 
@@ -383,11 +385,12 @@ class Client:
         """Gets the wallet for the specified Public Key.
     
         Args:
-            pk {str} -- A Public Key corresponding to a currently installed
+            pk: A Public Key corresponding to a currently installed
               wallet.
+            all_fields: return all available fields in response
 
         Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict.
+            dict, the "data" field of the JSON Response.
         """
         default_fields = [
             "balance",
@@ -412,10 +415,10 @@ class Client:
         """Creates a new Wallet.
     
         Args:
-            password {str} -- A password for the wallet to unlock.
+            password: A password for the wallet to unlock.
 
         Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict.
+            dict, the "data" field of the JSON Response.
         """
 
         op = Operation(mina_schema.mutation)
@@ -433,7 +436,7 @@ class Client:
             password: password for the wallet to unlock.
 
         Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict.
+            dict, the "data" field of the JSON Response.
         """
         op = Operation(mina_schema.mutation)
         op.unlock_wallet(input={"public_key": pk, "password": password})
@@ -450,7 +453,7 @@ class Client:
             password: password for the wallet to unlock.
 
         Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict.
+            dict, the "data" field of the JSON Response.
         """
         op = Operation(mina_schema.mutation)
         op.lock_wallet(input={"public_key": pk, "password": password})
@@ -460,9 +463,12 @@ class Client:
 
     def get_current_snark_worker(self, all_fields: bool = False) -> dict:
         """Gets the currently configured SNARK Worker from the Mina Daemon.
+
+        Args:
+            all_fields: return all available fields in response
     
         Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict.
+            dict, the "data" field of the JSON Response.
         """
         default_fields = ["key", "fee"]
 
@@ -475,20 +481,20 @@ class Client:
         res = self._send_sgqlc_query(op)
         return res["data"]
 
-    def set_current_snark_worker(self, worker_pk: str, fee: int) -> dict:
+    def set_current_snark_worker(self, worker_pk: str, fee: Currency) -> dict:
         """Set the current SNARK Worker preference. 
     
         Args:
             worker_pk: the public key corresponding to the desired SNARK
               Worker
-            fee: the desired SNARK Work fee
+            fee: Currency instance - the desired SNARK Work fee
 
         Returns:
             dict -- Returns the "data" field of the JSON Response as a Dict
         """
         op = Operation(mina_schema.mutation)
         op.set_snark_worker(input={"public_key": worker_pk})
-        op.set_snark_work_fee(input={"fee": fee})
+        op.set_snark_work_fee(input={"fee": fee.nanominas()})
 
         res = self._send_sgqlc_query(op)
         return res["data"]
@@ -506,11 +512,9 @@ class Client:
             fee: Currency instance. The transaction fee that will be attached to
               the payment
             memo:  memo to attach to the payment
-            all_fields: return all available fields in response
-
 
         Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict
+            dict, the "data" field of the JSON Response.
         """
 
         input_dict = {
@@ -538,7 +542,7 @@ class Client:
             all_fields: return all available fields in response
 
         Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict
+            dict, the "data" field of the JSON Response.
         """
 
         default_fields = ["from_", "to", "amount", "id", "is_delegation", "nonce"]
@@ -562,7 +566,7 @@ class Client:
             payment_id: Payment Id corresponding to a UserCommand.
 
         Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict.
+            dict, the "data" field of the JSON Response.
         """
         op = Operation(mina_schema.query)
         op.transaction_status(payment=payment_id)
@@ -580,7 +584,7 @@ class Client:
             all_fields: return all available fields in response
 
         Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict.
+            dict, the "data" field of the JSON Response.
         """
         default_fields = ["protocol_state", "state_hash"]
 
@@ -603,7 +607,7 @@ class Client:
             all_fields: return all available fields in response
 
         Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict.
+            dict, the "data" field of the JSON Response.
         """
 
         default_fields = ["state_hash", "creator", "snark_jobs"]
@@ -628,7 +632,7 @@ class Client:
             all_fields: return all available fields in response
 
         Returns:
-            dict -- Returns the "data" field of the JSON Response as a Dict.
+            dict, the "data" field of the JSON Response.
         """
 
         default_fields = ["creator", "protocol_state", "snark_jobs"]
@@ -670,7 +674,7 @@ class Client:
             callback(block) {coroutine} -- This coroutine is executed with the
             new block as an argument each time the subscription fires
         """
-        # add filter for pk
+        # TODO: add filter for pk
         op = Operation(mina_schema.subscription_type)
         op.new_block()
         variables = {}

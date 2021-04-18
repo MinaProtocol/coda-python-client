@@ -17,7 +17,7 @@ snapshots['TestMinaClient.test_get_daemon_status 1'] = [
                 'Accept': 'application/json'
             },
             'json': {
-                'query': 'query { daemonStatus { numAccounts blockchainLength highestBlockLengthReceived highestUnvalidatedBlockLengthReceived uptimeSecs ledgerMerkleRoot stateHash chainId commitId confDir peers { host libp2pPort peerId } userCommandsSent snarkWorker snarkWorkFee syncStatus catchupStatus blockProductionKeys histograms { externalTransitionLatency { values underflow overflow } acceptedTransitionLocalLatency { values underflow overflow } acceptedTransitionRemoteLatency { values underflow overflow } snarkWorkerTransitionTime { values underflow overflow } snarkWorkerMergeTime { values underflow overflow } } consensusTimeBestTip { epoch slot globalSlot startTime endTime } globalSlotSinceGenesisBestTip nextBlockProduction { times { epoch slot globalSlot startTime endTime } globalSlotSinceGenesis generatedFromConsensusAt { globalSlotSinceGenesis } } consensusTimeNow { epoch slot globalSlot startTime endTime } consensusMechanism consensusConfiguration { delta k slotsPerEpoch slotDuration epochDuration genesisStateTimestamp acceptableNetworkDelay } addrsAndPorts { externalIp bindIp peer { host libp2pPort peerId } libp2pPort clientPort } } }'
+                'query': 'query { daemonStatus { numAccounts blockchainLength highestBlockLengthReceived highestUnvalidatedBlockLengthReceived uptimeSecs ledgerMerkleRoot stateHash chainId commitId confDir peers { host libp2pPort peerId } userCommandsSent snarkWorker snarkWorkFee syncStatus catchupStatus blockProductionKeys consensusTimeBestTip { epoch slot globalSlot startTime endTime } globalSlotSinceGenesisBestTip nextBlockProduction { globalSlotSinceGenesis } consensusTimeNow { epoch slot globalSlot startTime endTime } consensusMechanism consensusConfiguration { delta k slotsPerEpoch slotDuration epochDuration genesisStateTimestamp acceptableNetworkDelay } addrsAndPorts { externalIp bindIp libp2pPort clientPort } } }'
             }
         }
     ,)
@@ -66,38 +66,6 @@ snapshots['TestMinaClient.test_get_current_snark_worker 1'] = [
             },
             'json': {
                 'query': 'query { currentSnarkWorker { key fee } }'
-            }
-        }
-    ,)
-]
-
-snapshots['TestMinaClient.test_get_sync_status 1'] = [
-    (
-        (
-            'http://localhost:3085/graphql'
-        ,),
-        {
-            'headers': {
-                'Accept': 'application/json'
-            },
-            'json': {
-                'query': 'query { daemonStatus { syncStatus } }'
-            }
-        }
-    ,)
-]
-
-snapshots['TestMinaClient.test_set_current_snark_worker 1'] = [
-    (
-        (
-            'http://localhost:3085/graphql'
-        ,),
-        {
-            'headers': {
-                'Accept': 'application/json'
-            },
-            'json': {
-                'query': 'mutation { setSnarkWorker(input: {publicKey: "pk"}) { lastSnarkWorker } setSnarkWorkFee(input: {fee: 1}) { lastFee } }'
             }
         }
     ,)
@@ -210,6 +178,38 @@ snapshots['TestMinaClient.test_send_payment 1'] = [
             },
             'json': {
                 'query': 'mutation { sendPayment(input: {memo: "memo", fee: 100000000, amount: 1000000000, to: "to_pk", from: "from_pk"}) { payment { id hash kind nonce token amount feeToken fee memo isDelegation from to failureReason } } }'
+            }
+        }
+    ,)
+]
+
+snapshots['TestMinaClient.test_set_current_snark_worker 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
+            },
+            'json': {
+                'query': 'mutation { setSnarkWorker(input: {publicKey: "pk"}) { lastSnarkWorker } setSnarkWorkFee(input: {fee: 1000000000}) { lastFee } }'
+            }
+        }
+    ,)
+]
+
+snapshots['TestMinaClient.test_get_sync_status 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
+            },
+            'json': {
+                'query': 'query { daemonStatus { syncStatus } }'
             }
         }
     ,)

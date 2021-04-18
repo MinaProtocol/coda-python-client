@@ -83,7 +83,8 @@ class TestMinaClient:
         mock_post.return_value = self._mock_response(json_data={"data": "foo"})
 
         client = Client()
-        client.set_current_snark_worker("pk", 1)
+        fee = Currency(1)
+        client.set_current_snark_worker("pk", fee=fee)
         snapshot.assert_match(mock_post.call_args_list)
 
     def test_create_wallet(self, mock_post, snapshot):

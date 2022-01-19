@@ -1,7 +1,7 @@
 from __future__ import with_statement
 
 try:
-    from setuptools import setup
+    from setuptools import setup, find_packages
 except ImportError:
     from distutils.core import setup
 
@@ -12,7 +12,7 @@ tests_require = ["six", "pytest", "pytest-cov", "python-coveralls", "mock", "pys
 
 setup(
     name="MinaClient",
-    version="0.0.14",
+    version="0.0.15",
     python_requires=">=3.5",
     description="A Python wrapper around the Mina Daemon GraphQL API.",
     github="http://github.com/CodaProtocol/coda-python",
@@ -24,6 +24,7 @@ setup(
     extras_require={"test": tests_require, "pytest": ["pytest"]},
     tests_require=tests_require,
     long_description=open("README.md").read(),
+    packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",

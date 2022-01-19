@@ -11,6 +11,7 @@ import websockets
 from sgqlc.operation import Operation
 
 from mina_schemas import mina_schema
+from mina_schemas import mina_explorer_schema
 
 
 class CurrencyFormat(Enum):
@@ -219,7 +220,7 @@ class Client:
 
     def _send_query(self, query: str, variables: dict = {}) -> dict:
         """Sends a query to the Mina Daemon's GraphQL Endpoint
-    
+
         Args:
             query: a GraphQL Query string
             variables: Optional Variables dict for the query
@@ -231,7 +232,7 @@ class Client:
 
     def _send_mutation(self, query: str, variables: dict = {}) -> dict:
         """Sends a mutation to the Mina Daemon's GraphQL Endpoint.
-    
+
         Args:
             query: a GraphQL Query string
             variables: Optional Variables dict for the query
@@ -246,7 +247,7 @@ class Client:
 
         GraphQL queries all look alike, this is a generic function to
         facilitate a GraphQL Request.
-    
+
         Args:
             query: a GraphQL Query string
             variables: Optional Variables dict for the query
@@ -324,7 +325,7 @@ class Client:
 
     def get_daemon_status(self) -> dict:
         """Gets the status of the currently configured Mina Daemon.
-    
+
         Returns:
              dict, the "data" field of the JSON Response.
         """
@@ -350,7 +351,7 @@ class Client:
 
     def get_daemon_version(self) -> dict:
         """Gets the version of the currently configured Mina Daemon.
-    
+
         Returns:
             dict, the "data" field of the JSON Response.
         """
@@ -383,7 +384,7 @@ class Client:
 
     def get_wallet(self, pk: str, all_fields: bool = False) -> dict:
         """Gets the wallet for the specified Public Key.
-    
+
         Args:
             pk: A Public Key corresponding to a currently installed
               wallet.
@@ -413,7 +414,7 @@ class Client:
 
     def create_wallet(self, password: str) -> dict:
         """Creates a new Wallet.
-    
+
         Args:
             password: A password for the wallet to unlock.
 
@@ -466,7 +467,7 @@ class Client:
 
         Args:
             all_fields: return all available fields in response
-    
+
         Returns:
             dict, the "data" field of the JSON Response.
         """
@@ -482,8 +483,8 @@ class Client:
         return res["data"]
 
     def set_current_snark_worker(self, worker_pk: str, fee: Currency) -> dict:
-        """Set the current SNARK Worker preference. 
-    
+        """Set the current SNARK Worker preference.
+
         Args:
             worker_pk: the public key corresponding to the desired SNARK
               Worker
@@ -503,7 +504,7 @@ class Client:
         self, to_pk: str, from_pk: str, amount: Currency, fee: Currency, memo: str
     ) -> dict:
         """Send a payment from the specified wallet to specified target wallet.
-    
+
         Args:
             to_pk: The target wallet where funds should be sent
             from_pk: The installed wallet which will finance the
@@ -535,7 +536,7 @@ class Client:
 
     def get_pooled_payments(self, pk: str = None, all_fields: bool = False) -> dict:
         """Get the current transactions in the payments pool.
-    
+
         Args:
             pk: The public key corresponding to the installed wallet
               that will be queried
@@ -561,7 +562,7 @@ class Client:
 
     def get_transaction_status(self, payment_id: str) -> dict:
         """Get the transaction status for the specified Payment Id.
-    
+
         Args:
             payment_id: Payment Id corresponding to a UserCommand.
 
@@ -657,7 +658,7 @@ class Client:
         return res
 
     async def listen_sync_update(self, callback):
-        """Creates a subscription for Network Sync Updates. """
+        """Creates a subscription for Network Sync Updates."""
 
         op = Operation(mina_schema.subscription_type)
         op.new_sync_update()
@@ -669,7 +670,7 @@ class Client:
         """Creates a subscription for new blocks.
 
          Calls `callback` each time the subscription fires.
-    
+
         Args:
             callback(block) {coroutine} -- This coroutine is executed with the
             new block as an argument each time the subscription fires

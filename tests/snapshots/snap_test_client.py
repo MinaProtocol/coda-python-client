@@ -7,174 +7,209 @@ from pysnap import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['TestCodaClient.test_get_daemon_status 1'] = [
+snapshots['TestMinaClient.test_get_daemon_status 1'] = [
     (
         (
-            'http://localhost:8304/graphql'
+            'http://localhost:3085/graphql'
         ,),
         {
             'headers': {
                 'Accept': 'application/json'
             },
             'json': {
-                'query': 'query { daemonStatus { numAccounts blockchainLength highestBlockLengthReceived uptimeSecs ledgerMerkleRoot stateHash commitId peers userCommandsSent snarkWorker snarkWorkFee syncStatus proposePubkeys consensusTimeBestTip consensusTimeNow consensusMechanism confDir commitId consensusConfiguration { delta k c cTimesK slotsPerEpoch slotDuration epochDuration acceptableNetworkDelay } } }'
+                'query': 'query { daemonStatus { numAccounts blockchainLength highestBlockLengthReceived highestUnvalidatedBlockLengthReceived uptimeSecs ledgerMerkleRoot stateHash chainId commitId confDir peers { host libp2pPort peerId } userCommandsSent snarkWorker snarkWorkFee syncStatus catchupStatus blockProductionKeys consensusTimeBestTip { epoch slot globalSlot startTime endTime } globalSlotSinceGenesisBestTip nextBlockProduction { globalSlotSinceGenesis } consensusTimeNow { epoch slot globalSlot startTime endTime } consensusMechanism consensusConfiguration { delta k slotsPerEpoch slotDuration epochDuration genesisStateTimestamp acceptableNetworkDelay } addrsAndPorts { externalIp bindIp libp2pPort clientPort } } }'
             }
         }
     ,)
 ]
 
-snapshots['TestCodaClient.test_get_daemon_version 1'] = [
+snapshots['TestMinaClient.test_get_daemon_version 1'] = [
     (
         (
-            'http://localhost:8304/graphql'
+            'http://localhost:3085/graphql'
         ,),
         {
             'headers': {
                 'Accept': 'application/json'
             },
             'json': {
-                'query': '{ version }'
+                'query': 'query { version }'
             }
         }
     ,)
 ]
 
-snapshots['TestCodaClient.test_get_wallets 1'] = [
+snapshots['TestMinaClient.test_get_wallets 1'] = [
     (
         (
-            'http://localhost:8304/graphql'
+            'http://localhost:3085/graphql'
         ,),
         {
             'headers': {
                 'Accept': 'application/json'
             },
             'json': {
-                'query': '{ ownedWallets { publicKey balance { total } } }'
+                'query': 'query { ownedWallets { publicKey balance { total unknown liquid locked blockHeight stateHash } } }'
             }
         }
     ,)
 ]
 
-snapshots['TestCodaClient.test_get_current_snark_worker 1'] = [
+snapshots['TestMinaClient.test_get_current_snark_worker 1'] = [
     (
         (
-            'http://localhost:8304/graphql'
+            'http://localhost:3085/graphql'
         ,),
         {
             'headers': {
                 'Accept': 'application/json'
             },
             'json': {
-                'query': '{ currentSnarkWorker{ key fee } }'
+                'query': 'query { currentSnarkWorker { key fee } }'
             }
         }
     ,)
 ]
 
-snapshots['TestCodaClient.test_get_sync_status 1'] = [
+snapshots['TestMinaClient.test_get_wallet 1'] = [
     (
         (
-            'http://localhost:8304/graphql'
+            'http://localhost:3085/graphql'
         ,),
         {
             'headers': {
                 'Accept': 'application/json'
             },
             'json': {
-                'query': '{ syncStatus }'
+                'query': 'query { wallet(publicKey: "pk") { balance { total unknown liquid locked blockHeight stateHash } nonce receiptChainHash delegate votingFor stakingActive privateKeyPath } }'
             }
         }
     ,)
 ]
 
-snapshots['TestCodaClient.test_set_current_snark_worker 1'] = [
+snapshots['TestMinaClient.test_get_transaction_status 1'] = [
     (
         (
-            'http://localhost:8304/graphql'
+            'http://localhost:3085/graphql'
         ,),
         {
             'headers': {
                 'Accept': 'application/json'
             },
             'json': {
-                'query': '{ syncStatus }'
+                'query': 'query { transactionStatus(payment: "payment_id") }'
             }
         }
     ,)
 ]
 
-snapshots['TestCodaClient.test_send_payment 1'] = [
+snapshots['TestMinaClient.test_create_wallet 1'] = [
     (
         (
-            'http://localhost:8304/graphql'
+            'http://localhost:3085/graphql'
         ,),
         {
             'headers': {
                 'Accept': 'application/json'
             },
             'json': {
-                'query': 'mutation($from:PublicKey!, $to:PublicKey!, $amount:UInt64!, $fee:UInt64!, $memo:String){ sendPayment(input: { from:$from, to:$to, amount:$amount, fee:$fee, memo:$memo }) { payment { id, isDelegation, nonce, from, to, amount, fee, memo } } }',
-                'variables': {
-                    'amount': 'amount',
-                    'fee': 'fee',
-                    'from': 'from_pk',
-                    'memo': 'memo',
-                    'to': 'to_pk'
-                }
+                'query': 'mutation { createAccount(input: {password: "password"}) { publicKey account { publicKey token nonce inferredNonce receiptChainHash delegate votingFor stakingActive privateKeyPath locked isTokenOwner isDisabled } } }'
             }
         }
     ,)
 ]
 
-snapshots['TestCodaClient.test_get_wallet 1'] = [
+snapshots['TestMinaClient.test_get_best_chain 1'] = [
     (
         (
-            'http://localhost:8304/graphql'
+            'http://localhost:3085/graphql'
         ,),
         {
             'headers': {
                 'Accept': 'application/json'
             },
             'json': {
-                'query': 'query($publicKey:PublicKey!){ wallet(publicKey:$publicKey) { publicKey balance { total unknown } nonce receiptChainHash delegate votingFor stakingActive privateKeyPath } }',
-                'variables': {
-                    'publicKey': 'pk'
-                }
+                'query': 'query { bestChain(maxLength: 42) { protocolState { previousStateHash blockchainState { date utcDate snarkedLedgerHash stagedLedgerHash } consensusState { blockchainLength blockHeight epochCount minWindowDensity lastVrfOutput totalCurrency hasAncestorInSameCheckpointWindow slot slotSinceGenesis epoch } } stateHash } }'
             }
         }
     ,)
 ]
 
-snapshots['TestCodaClient.test_create_wallet_no_args 1'] = [
+snapshots['TestMinaClient.test_get_block_by_height 1'] = [
     (
         (
-            'http://localhost:8304/graphql'
+            'http://localhost:3085/graphql'
         ,),
         {
             'headers': {
                 'Accept': 'application/json'
             },
             'json': {
-                'query': 'mutation{ addWallet { publicKey } }'
+                'query': 'query { block(height: 42) { stateHash creator snarkJobs { prover fee workIds } } }'
             }
         }
     ,)
 ]
 
-snapshots['TestCodaClient.test_get_transaction_status 1'] = [
+snapshots['TestMinaClient.test_get_block_by_state_hash 1'] = [
     (
         (
-            'http://localhost:8304/graphql'
+            'http://localhost:3085/graphql'
         ,),
         {
             'headers': {
                 'Accept': 'application/json'
             },
             'json': {
-                'query': 'query($paymentId:ID!){ transactionStatus(payment:$paymentId) }',
-                'variables': {
-                    'paymentId': 'payment_id'
-                }
+                'query': 'query { block(stateHash: "some_state_hash") { creator protocolState { previousStateHash blockchainState { date utcDate snarkedLedgerHash stagedLedgerHash } consensusState { blockchainLength blockHeight epochCount minWindowDensity lastVrfOutput totalCurrency hasAncestorInSameCheckpointWindow slot slotSinceGenesis epoch } } snarkJobs { prover fee workIds } } }'
+            }
+        }
+    ,)
+]
+
+snapshots['TestMinaClient.test_send_payment 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
+            },
+            'json': {
+                'query': 'mutation { sendPayment(input: {memo: "memo", fee: 100000000, amount: 1000000000, to: "to_pk", from: "from_pk"}) { payment { id hash kind nonce token amount feeToken fee memo isDelegation from to failureReason } } }'
+            }
+        }
+    ,)
+]
+
+snapshots['TestMinaClient.test_set_current_snark_worker 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
+            },
+            'json': {
+                'query': 'mutation { setSnarkWorker(input: {publicKey: "pk"}) { lastSnarkWorker } setSnarkWorkFee(input: {fee: 1000000000}) { lastFee } }'
+            }
+        }
+    ,)
+]
+
+snapshots['TestMinaClient.test_get_sync_status 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
+            },
+            'json': {
+                'query': 'query { daemonStatus { syncStatus } }'
             }
         }
     ,)

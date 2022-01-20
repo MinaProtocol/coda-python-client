@@ -1,6 +1,6 @@
-# Coda Python API Client
+# Mina Python API Client
 
-This module implements a lightweight wrapper around the Coda Daemon's GraphQL Endpoint. It under active development but may not be consistent with the nightly Coda Daemon build. 
+This module implements a lightweight wrapper around the Mina Daemon's GraphQL Endpoint. It under active development but may not be consistent with the nightly Mina Daemon build. 
 
 **Need Help?** if you're having trouble installing or using this library, (or if you just build something cool with this) join us in the [Coda Protocol Discord Server](https://discordapp.com/invite/Vexf4ED) and we can help you out. 
 

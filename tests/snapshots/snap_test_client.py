@@ -4,198 +4,213 @@ from __future__ import unicode_literals
 
 from pysnap import Snapshot
 
+
 snapshots = Snapshot()
 
-snapshots["TestMinaClient.test_get_daemon_status 1"] = [(
-    ("http://localhost:3085/graphql", ),
-    {
-        "headers": {
-            "Accept": "application/json"
-        },
-        "json": {
-            "query":
-            "query { daemonStatus { addrsAndPorts { bindIp clientPort externalIp libp2pPort peer { host libp2pPort peerId } } blockProductionKeys blockchainLength commitId confDir consensusConfiguration { acceptableNetworkDelay delta epochDuration genesisStateTimestamp k slotDuration slotsPerEpoch } consensusMechanism consensusTimeBestTip { endTime epoch globalSlot slot startTime } consensusTimeNow { endTime epoch globalSlot slot startTime } highestBlockLengthReceived ledgerMerkleRoot nextBlockProduction { times { endTime epoch globalSlot slot startTime } } numAccounts peers snarkWorkFee snarkWorker stateHash syncStatus uptimeSecs userCommandsSent } }"
-        },
-    },
-)]
-
-snapshots["TestMinaClient.test_get_daemon_version 1"] = [(
-    ("http://localhost:3085/graphql", ),
-    {
-        "headers": {
-            "Accept": "application/json"
-        },
-        "json": {
-            "query": "{ version }"
+snapshots['TestMinaClient.test_get_daemon_status 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
+            },
+            'json': {
+                'query': 'query { daemonStatus { numAccounts blockchainLength highestBlockLengthReceived highestUnvalidatedBlockLengthReceived uptimeSecs ledgerMerkleRoot stateHash chainId commitId confDir peers { host libp2pPort peerId } userCommandsSent snarkWorker snarkWorkFee syncStatus catchupStatus blockProductionKeys consensusTimeBestTip { epoch slot globalSlot startTime endTime } globalSlotSinceGenesisBestTip nextBlockProduction { globalSlotSinceGenesis } consensusTimeNow { epoch slot globalSlot startTime endTime } consensusMechanism consensusConfiguration { delta k slotsPerEpoch slotDuration epochDuration genesisStateTimestamp acceptableNetworkDelay } addrsAndPorts { externalIp bindIp libp2pPort clientPort } } }'
+            }
         }
-    },
-)]
+    ,)
+]
 
-snapshots["TestMinaClient.test_get_wallets 1"] = [(
-    ("http://localhost:3085/graphql", ),
-    {
-        "headers": {
-            "Accept": "application/json"
-        },
-        "json": {
-            "query": "{ ownedWallets { publicKey balance { total } } }"
-        },
-    },
-)]
-
-snapshots["TestMinaClient.test_get_current_snark_worker 1"] = [(
-    ("http://localhost:3085/graphql", ),
-    {
-        "headers": {
-            "Accept": "application/json"
-        },
-        "json": {
-            "query": "{ currentSnarkWorker { key fee } }"
-        },
-    },
-)]
-
-snapshots["TestMinaClient.test_get_sync_status 1"] = [(
-    ("http://localhost:3085/graphql", ),
-    {
-        "headers": {
-            "Accept": "application/json"
-        },
-        "json": {
-            "query": "{ daemonStatus { syncStatus } }"
-        },
-    },
-)]
-
-snapshots["TestMinaClient.test_set_current_snark_worker 1"] = [(
-    ("http://localhost:3085/graphql", ),
-    {
-        "headers": {
-            "Accept": "application/json"
-        },
-        "json": {
-            "query":
-            "mutation($worker_pk: PublicKey!, $fee: UInt64!) { setSnarkWorker(input: { publicKey: $worker_pk }) { lastSnarkWorker } setSnarkWorkFee(input: { fee: $fee }) }",
-            "variables": {
-                "fee": 1,
-                "worker_pk": "pk"
+snapshots['TestMinaClient.test_get_daemon_version 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
             },
-        },
-    },
-)]
+            'json': {
+                'query': 'query { version }'
+            }
+        }
+    ,)
+]
 
-snapshots["TestMinaClient.test_get_wallet 1"] = [(
-    ("http://localhost:3085/graphql", ),
-    {
-        "headers": {
-            "Accept": "application/json"
-        },
-        "json": {
-            "query":
-            "query($publicKey: PublicKey!) { wallet(publicKey: $publicKey) { publicKey balance { total unknown } nonce receiptChainHash delegate votingFor stakingActive privateKeyPath } }",
-            "variables": {
-                "publicKey": "pk"
+snapshots['TestMinaClient.test_get_wallets 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
             },
-        },
-    },
-)]
+            'json': {
+                'query': 'query { ownedWallets { publicKey balance { total unknown liquid locked blockHeight stateHash } } }'
+            }
+        }
+    ,)
+]
 
-snapshots["TestMinaClient.test_get_transaction_status 1"] = [(
-    ("http://localhost:3085/graphql", ),
-    {
-        "headers": {
-            "Accept": "application/json"
-        },
-        "json": {
-            "query":
-            "query($paymentId: ID!) { transactionStatus(payment: $paymentId) }",
-            "variables": {
-                "paymentId": "payment_id"
+snapshots['TestMinaClient.test_get_current_snark_worker 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
             },
-        },
-    },
-)]
+            'json': {
+                'query': 'query { currentSnarkWorker { key fee } }'
+            }
+        }
+    ,)
+]
 
-snapshots["TestMinaClient.test_create_wallet 1"] = [(
-    ("http://localhost:3085/graphql", ),
-    {
-        "headers": {
-            "Accept": "application/json"
-        },
-        "json": {
-            "query":
-            "mutation($password: String!) { createAccount(input: { password: $password }) { publicKey } }",
-            "variables": {
-                "password": "password"
+snapshots['TestMinaClient.test_get_wallet 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
             },
-        },
-    },
-)]
+            'json': {
+                'query': 'query { wallet(publicKey: "pk") { balance { total unknown liquid locked blockHeight stateHash } nonce receiptChainHash delegate votingFor stakingActive privateKeyPath } }'
+            }
+        }
+    ,)
+]
 
-snapshots["TestMinaClient.test_send_payment 1"] = [(
-    ("http://localhost:3085/graphql", ),
-    {
-        "headers": {
-            "Accept": "application/json"
-        },
-        "json": {
-            "query":
-            "mutation( $from: PublicKey! $to: PublicKey! $amount: UInt64! $fee: UInt64! $memo: String ) { sendPayment( input: { from: $from, to: $to, amount: $amount, fee: $fee, memo: $memo } ) { payment { id isDelegation nonce from to amount fee memo } } }",
-            "variables": {
-                "amount": 1000000000,
-                "fee": 100000000,
-                "from": "from_pk",
-                "memo": "memo",
-                "to": "to_pk",
+snapshots['TestMinaClient.test_get_transaction_status 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
             },
-        },
-    },
-)]
+            'json': {
+                'query': 'query { transactionStatus(payment: "payment_id") }'
+            }
+        }
+    ,)
+]
 
-snapshots["TestMinaClient.test_get_best_chain 1"] = [(
-    ("http://localhost:3085/graphql", ),
-    {
-        "headers": {
-            "Accept": "application/json"
-        },
-        "json": {
-            "query":
-            "query ($maxLength: Int!) { bestChain(maxLength: $maxLength) { protocolState { consensusState { blockHeight } previousStateHash } stateHash } }",
-            "variables": {
-                "maxLength": 42
+snapshots['TestMinaClient.test_create_wallet 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
             },
-        },
-    },
-)]
+            'json': {
+                'query': 'mutation { createAccount(input: {password: "password"}) { publicKey account { publicKey token nonce inferredNonce receiptChainHash delegate votingFor stakingActive privateKeyPath locked isTokenOwner isDisabled } } }'
+            }
+        }
+    ,)
+]
 
-snapshots["TestMinaClient.test_get_block_by_height 1"] = [(
-    ("http://localhost:3085/graphql", ),
-    {
-        "headers": {
-            "Accept": "application/json"
-        },
-        "json": {
-            "query":
-            "query ($height: Int!) { block(height: $height) { stateHash creator snarkJobs { fee prover } } }",
-            "variables": {
-                "height": 42
+snapshots['TestMinaClient.test_get_best_chain 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
             },
-        },
-    },
-)]
+            'json': {
+                'query': 'query { bestChain(maxLength: 42) { protocolState { previousStateHash blockchainState { date utcDate snarkedLedgerHash stagedLedgerHash } consensusState { blockchainLength blockHeight epochCount minWindowDensity lastVrfOutput totalCurrency hasAncestorInSameCheckpointWindow slot slotSinceGenesis epoch } } stateHash } }'
+            }
+        }
+    ,)
+]
 
-snapshots["TestMinaClient.test_get_block_by_state_hash 1"] = [(
-    ("http://localhost:3085/graphql", ),
-    {
-        "headers": {
-            "Accept": "application/json"
-        },
-        "json": {
-            "query":
-            "query ($stateHash: String!) { block(stateHash: $stateHash) { creator protocolState { consensusState { blockHeight } } snarkJobs { fee prover } } }",
-            "variables": {
-                "stateHash": "some_state_hash"
+snapshots['TestMinaClient.test_get_block_by_height 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
             },
-        },
-    },
-)]
+            'json': {
+                'query': 'query { block(height: 42) { stateHash creator snarkJobs { prover fee workIds } } }'
+            }
+        }
+    ,)
+]
+
+snapshots['TestMinaClient.test_get_block_by_state_hash 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
+            },
+            'json': {
+                'query': 'query { block(stateHash: "some_state_hash") { creator protocolState { previousStateHash blockchainState { date utcDate snarkedLedgerHash stagedLedgerHash } consensusState { blockchainLength blockHeight epochCount minWindowDensity lastVrfOutput totalCurrency hasAncestorInSameCheckpointWindow slot slotSinceGenesis epoch } } snarkJobs { prover fee workIds } } }'
+            }
+        }
+    ,)
+]
+
+snapshots['TestMinaClient.test_send_payment 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
+            },
+            'json': {
+                'query': 'mutation { sendPayment(input: {memo: "memo", fee: 100000000, amount: 1000000000, to: "to_pk", from: "from_pk"}) { payment { id hash kind nonce token amount feeToken fee memo isDelegation from to failureReason } } }'
+            }
+        }
+    ,)
+]
+
+snapshots['TestMinaClient.test_set_current_snark_worker 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
+            },
+            'json': {
+                'query': 'mutation { setSnarkWorker(input: {publicKey: "pk"}) { lastSnarkWorker } setSnarkWorkFee(input: {fee: 1000000000}) { lastFee } }'
+            }
+        }
+    ,)
+]
+
+snapshots['TestMinaClient.test_get_sync_status 1'] = [
+    (
+        (
+            'http://localhost:3085/graphql'
+        ,),
+        {
+            'headers': {
+                'Accept': 'application/json'
+            },
+            'json': {
+                'query': 'query { daemonStatus { syncStatus } }'
+            }
+        }
+    ,)
+]
